@@ -4,6 +4,9 @@ import android.app.Activity
 import android.graphics.Color
 import android.view.View
 import android.view.WindowManager
+import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 
 fun Activity.transparentStatusBar() {
     @Suppress("DEPRECATION")
@@ -23,4 +26,15 @@ private fun setWindowFlag(bits: Int, on: Boolean, activity: Activity) {
         winParams.flags = winParams.flags and bits.inv()
     }
     win.attributes = winParams
+}
+
+fun Fragment.onBackPressed(function: () -> Unit) {
+    (this.activity as AppCompatActivity).supportFragmentManager
+    this.requireActivity().onBackPressedDispatcher.addCallback(
+        this.requireActivity() /* lifecycle owner */,
+        object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                function()
+            }
+        })
 }

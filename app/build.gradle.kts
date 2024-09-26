@@ -87,4 +87,7 @@ dependencies {
 
     // datastore
     implementation(libs.data.store)
+
+    // location
+    implementation(libs.play.services.location)
 }

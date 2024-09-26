@@ -4,4 +4,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="green_splash">#006819</color>
     <color name="transparent">#00000000</color>
+    <color name="alpha_white">#9EFFFFFF</color>
+    <color name="green">#005B16</color>
 </resources>

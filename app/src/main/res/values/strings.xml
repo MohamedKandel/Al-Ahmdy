@@ -3,4 +3,6 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
     <string name="mosque" translatable="false">mosque</string>
+    <string name="request_location">We use Location services to accurately detect your city</string>
+    <string name="locate_me">Locate me</string>
 </resources>
