@@ -6,4 +6,6 @@
     <color name="transparent">#00000000</color>
     <color name="alpha_white">#9EFFFFFF</color>
     <color name="green">#005B16</color>
+    <color name="btm_bar_color">#006819</color>
+    <color name="alphaBlack">#60000000</color>
 </resources>

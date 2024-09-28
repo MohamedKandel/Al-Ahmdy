@@ -9,10 +9,144 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:defaultNavHost="true"
         android:name="androidx.navigation.fragment.NavHostFragment"
-        app:navGraph="@navigation/nav_graph"/>
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:defaultNavHost="true"
+        app:layout_constraintBottom_toTopOf="@id/btm_bar"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navGraph="@navigation/nav_graph" />
+
+    <GridLayout
+        android:id="@+id/btm_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/btm_bar_color"
+        android:columnCount="4"
+        android:layoutDirection="locale"
+        android:textDirection="locale"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:layout_columnWeight="1">
+
+            <ImageView
+                android:id="@+id/home_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/home_icon"
+                android:layout_marginTop="@dimen/_15sdp"/>
+
+            <TextView
+                android:id="@+id/txt_home"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat_regular"
+                android:gravity="center"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@id/home_icon"
+                android:text="@string/home"
+                android:background="@drawable/pointer"
+                android:layout_marginTop="@dimen/_5sdp"
+                android:textColor="@color/white" />
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:layout_columnWeight="1">
+
+            <ImageView
+                android:id="@+id/quran_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/quraan_icon"
+                android:layout_marginTop="@dimen/_15sdp"/>
+
+            <TextView
+                android:id="@+id/txt_quran"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat_regular"
+                android:gravity="center"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/_5sdp"
+                android:layout_below="@+id/quran_icon"
+                android:text="@string/quraan"
+                android:background="@drawable/pointer"
+                android:textColor="@color/white" />
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="2"
+            android:layout_columnWeight="1">
+
+            <ImageView
+                android:id="@+id/qibla_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/qibla_icon"
+                android:layout_marginTop="@dimen/_15sdp"/>
+
+            <TextView
+                android:id="@+id/txt_qibla"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat_regular"
+                android:gravity="center"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/_5sdp"
+                android:text="@string/qibla"
+                android:background="@drawable/pointer"
+                android:layout_below="@+id/qibla_icon"
+                android:textColor="@color/white" />
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="3"
+            android:layout_columnWeight="1">
+
+            <ImageView
+                android:id="@+id/more_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/more_icon"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/_15sdp"/>
+
+            <TextView
+                android:id="@+id/txt_more"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat_regular"
+                android:gravity="center"
+                android:text="@string/more"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/_5sdp"
+                android:layout_below="@+id/more_icon"
+                android:background="@drawable/pointer"
+                android:textColor="@color/white" />
+
+
+        </RelativeLayout>
+
+    </GridLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

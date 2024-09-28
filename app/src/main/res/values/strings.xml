@@ -5,4 +5,13 @@
     <string name="mosque" translatable="false">mosque</string>
     <string name="request_location">We use Location services to accurately detect your city</string>
     <string name="locate_me">Locate me</string>
+    <string name="welcome">Welcome</string>
+    <string name="request_username">Enter your name to access to your account.</string>
+    <string name="username">Username</string>
+    <string name="done">Done</string>
+    <string name="hint_username">Mohamed Ahmed</string>
+    <string name="home">Home</string>
+    <string name="quraan">Quran</string>
+    <string name="qibla">Qibla</string>
+    <string name="more">More</string>
 </resources>

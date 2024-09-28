@@ -1,17 +1,17 @@
-package com.correct.alahmdy.ui
+package com.correct.alahmdy.ui.home
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
 import com.correct.alahmdy.R
-import com.correct.alahmdy.databinding.FragmentSplashBinding
+import com.correct.alahmdy.databinding.FragmentHomeBinding
 
+class HomeFragment : Fragment() {
 
-class SplashFragment : Fragment() {
-
-    private lateinit var binding: FragmentSplashBinding
+    private lateinit var binding: FragmentHomeBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,7 +22,8 @@ class SplashFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        binding = FragmentSplashBinding.inflate(inflater,container,false)
+        binding = FragmentHomeBinding.inflate(inflater, container, false)
+
         return binding.root
     }
 }

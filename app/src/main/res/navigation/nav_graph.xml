@@ -3,16 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/detectLocationFragment">
+    app:startDestination="@id/splashFragment">
 
     <fragment
         android:id="@+id/splashFragment"
-        android:name="com.correct.alahmdy.ui.SplashFragment"
+        android:name="com.correct.alahmdy.ui.onBoarding.SplashFragment"
         android:label="fragment_splash"
         tools:layout="@layout/fragment_splash" />
     <fragment
         android:id="@+id/detectLocationFragment"
-        android:name="com.correct.alahmdy.ui.DetectLocationFragment"
+        android:name="com.correct.alahmdy.ui.onBoarding.DetectLocationFragment"
         android:label="fragment_detect_location"
         tools:layout="@layout/fragment_detect_location" />
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.correct.alahmdy.ui.onBoarding.RegisterFragment"
+        android:label="fragment_register"
+        tools:layout="@layout/fragment_register" />
 </navigation>
