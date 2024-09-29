@@ -20,4 +20,14 @@
         android:name="com.correct.alahmdy.ui.onBoarding.RegisterFragment"
         android:label="fragment_register"
         tools:layout="@layout/fragment_register" />
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.correct.alahmdy.ui.home.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home" />
+    <fragment
+        android:id="@+id/qiblaFragment"
+        android:name="com.correct.alahmdy.ui.qibla.QiblaFragment"
+        android:label="fragment_qibla"
+        tools:layout="@layout/fragment_qibla" />
 </navigation>

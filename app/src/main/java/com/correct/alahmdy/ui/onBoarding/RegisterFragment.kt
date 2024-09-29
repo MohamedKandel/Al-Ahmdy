@@ -2,10 +2,13 @@ package com.correct.alahmdy.ui.onBoarding
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import androidx.navigation.fragment.findNavController
 import com.correct.alahmdy.R
 import com.correct.alahmdy.databinding.FragmentRegisterBinding
 import com.correct.alahmdy.helper.Constants.CAST_ERROR
@@ -41,6 +44,27 @@ class RegisterFragment : Fragment() {
         // Inflate the layout for this fragment
         binding = FragmentRegisterBinding.inflate(inflater,container,false)
 
+        binding.txtUsername.imeOptions = EditorInfo.IME_ACTION_DONE
+
+        binding.btnDone.setOnClickListener {
+            registerUser()
+        }
+
+        binding.txtUsername.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                registerUser()
+            }
+            true
+        }
+
         return binding.root
+    }
+
+    private fun registerUser() {
+        val name = binding.txtUsername.text
+        if (name.isNotEmpty()) {
+            Log.v("Done button", "Hello $name")
+            findNavController().navigate(R.id.homeFragment)
+        }
     }
 }

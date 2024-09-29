@@ -90,4 +90,8 @@ dependencies {
 
     // location
     implementation(libs.play.services.location)
+
+    // qibla
+    implementation(libs.android.qibla.finder)
+    implementation(libs.compass.qibla)
 }

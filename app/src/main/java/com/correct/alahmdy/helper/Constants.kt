@@ -9,4 +9,8 @@ object Constants {
     const val COUNTRY = "country"
     const val CITY = "city"
     const val CAST_ERROR = "MainActivity doesn't implement interface"
+    const val MUTE = "mute icon"
+    const val CLICKED = "clicked"
+    const val ITEM = "item"
+    const val ADAPTER = "adapter"
 }

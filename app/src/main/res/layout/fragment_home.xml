@@ -36,6 +36,7 @@
                 android:paddingEnd="@dimen/_10sdp"
                 android:paddingBottom="@dimen/_4sdp"
                 android:text="@string/home"
+                android:id="@+id/txt_city"
                 android:textColor="@color/white"
                 android:textSize="@dimen/_11ssp"
                 app:drawableStartCompat="@drawable/location_icon"
@@ -157,12 +158,61 @@
                     android:layout_height="@dimen/_1sdp"
                     android:layout_marginTop="@dimen/_12sdp"
                     android:background="#7D7575"
+                    android:id="@+id/line"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/txt_hijri_date" />
 
+                <androidx.recyclerview.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@+id/line"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:nestedScrollingEnabled="true"
+                    android:layout_marginStart="@dimen/_20sdp"
+                    android:layout_marginEnd="@dimen/_18sdp"
+                    android:layout_marginTop="@dimen/_18sdp"
+                    android:id="@+id/praying_time_recyclerView"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/praying_time_list_item"
+                    tools:itemCount="6"/>
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_5sdp"
+                    android:layerType="software"
+                    app:layout_constraintTop_toBottomOf="@id/praying_time_recyclerView"
+                    android:background="@drawable/dashed_line"
+                    android:id="@+id/dashed_line"/>
+
+                <include
+                    layout="@layout/praying_time_list_item"
+                    android:id="@+id/qiam_pray"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/dashed_line"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginStart="@dimen/_20sdp"
+                    android:layout_marginEnd="@dimen/_18sdp"
+                    android:layout_marginTop="@dimen/_12sdp"/>
 
 
+                <androidx.recyclerview.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@+id/qiam_pray"
+                    android:id="@+id/ad_ons_recyclerView"
+                    android:orientation="horizontal"
+                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                    tools:listitem="@layout/ad_ons_list_item"
+                    android:layout_marginTop="@dimen/_31sdp"
+                    android:layout_marginStart="@dimen/_15sdp"
+                    tools:itemCount="4"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.core.widget.NestedScrollView>

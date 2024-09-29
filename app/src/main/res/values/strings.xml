@@ -14,4 +14,11 @@
     <string name="quraan">Quran</string>
     <string name="qibla">Qibla</string>
     <string name="more">More</string>
+    <string name="tasbeh">Tasbeh</string>
+    <string name="duaa">Duaa</string>
+    <string name="azkar">Azkar</string>
+    <string name="hadith">Hadith</string>
+    <string name="notification_required">Notification is required for Azan</string>
+    <string name="notification_sorry">We are sorry… you should enable notification permission manually</string>
+    <string name="qibla_direction">Qibla angle of your location</string>
 </resources>
