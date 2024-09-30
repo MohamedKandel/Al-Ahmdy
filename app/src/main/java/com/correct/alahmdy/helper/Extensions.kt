@@ -5,9 +5,14 @@ import android.graphics.Color
 import android.util.Base64
 import android.view.View
 import android.view.WindowManager
+import android.widget.TextClock
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import java.lang.StringBuilder
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
@@ -47,6 +52,7 @@ fun Fragment.onBackPressed(function: () -> Unit) {
             }
         })
 }
+
 // Encrypt a string
 fun String.generateKeyFromString(): SecretKey {
     val keyBytes = this.toByteArray(Charsets.UTF_8)
@@ -54,6 +60,7 @@ fun String.generateKeyFromString(): SecretKey {
     val secretKeyBytes = keyBytes.copyOf(16) // If shorter, pad with zeros
     return SecretKeySpec(secretKeyBytes, "AES")
 }
+
 // Decrypt a string
 fun String.decrypt(key: SecretKey, iv: ByteArray): String {
     val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
@@ -69,4 +76,56 @@ fun View.hide() {
 
 fun View.show() {
     this.visibility = View.VISIBLE
+}
+
+// call to get Time aa and set it to text clock
+fun String.getAa(): String {
+    val chars = this.toCharArray()
+    val strBuilder = StringBuilder()
+    for (c in chars) {
+        if (!(c == '0' || c == '1' || c == '2' ||
+                    c == '3' || c == '4' || c == '5' ||
+                    c == '6' || c == '7' || c == '8' ||
+                    c == '9')) {
+            strBuilder.append(c)
+        }
+    }
+    return strBuilder.toString()
+}
+
+// call to get Time and set it to text clock
+fun String.getTime(): String {
+    val chars = this.toCharArray()
+    val strBuilder = StringBuilder()
+    for (c in chars) {
+        if (c == '0' || c == '1' || c == '2' ||
+            c == '3' || c == '4' || c == '5' ||
+            c == '6' || c == '7' || c == '8' ||
+            c == '9' || c == ':') {
+            strBuilder.append(c)
+        }
+    }
+    return strBuilder.toString()
+}
+
+fun String.convertTimeToTimestamp(): Long? {
+    val timeFormat = SimpleDateFormat("hh:mm aa", Locale.getDefault())
+    return try {
+        // Parse the time string to a Date object
+        val time = timeFormat.parse(this)
+        // Return the time in milliseconds since epoch (as a timestamp)
+        time?.time
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
+
+fun Long.convertTimestampToTimeString(): String {
+    // Define the time format (hh:mm:ss aa)
+    val timeFormat = SimpleDateFormat("hh:mm aa", Locale.getDefault())
+    // Create a Date object from the Long timestamp
+    val date = Date(this)
+    // Format the Date object into the time string
+    return timeFormat.format(date)
 }
