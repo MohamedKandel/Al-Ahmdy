@@ -22,4 +22,5 @@
     <string name="notification_sorry">We are sorry… you should enable notification permission manually</string>
     <string name="qibla_direction">Qibla angle of your location</string>
     <string name="qibla_title">Qibla direction</string>
+    <string name="last_read">Last Read</string>
 </resources>

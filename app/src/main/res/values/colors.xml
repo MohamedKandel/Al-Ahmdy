@@ -9,4 +9,5 @@
     <color name="btm_bar_color">#006819</color>
     <color name="alphaBlack">#60000000</color>
     <color name="light_green">#00CE32</color>
+    <color name="shadow_color">#83B6B6B6</color>
 </resources>

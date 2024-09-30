@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:strokeColor="#AEB1AF"
+    app:strokeWidth="@dimen/_1sdp"
+    app:cardBackgroundColor="@color/transparent"
+    app:cardCornerRadius="@dimen/_3sdp"
+    android:layout_margin="@dimen/_12sdp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Al-Fatiha"
+        android:layout_marginTop="@dimen/_6sdp"
+        android:layout_marginBottom="@dimen/_6sdp"
+        android:layout_marginStart="@dimen/_18sdp"
+        android:layout_marginEnd="@dimen/_18sdp"
+        android:id="@+id/txt_surah_name"
+        android:fontFamily="@font/poppins_medium"
+        android:textColor="@color/btm_bar_color"
+        android:textSize="@dimen/_12ssp"/>
+
+</com.google.android.material.card.MaterialCardView>

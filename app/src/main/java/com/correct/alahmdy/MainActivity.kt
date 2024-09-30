@@ -45,6 +45,7 @@ class MainActivity : AppCompatActivity(), FragmentChangeListener {
 
         binding.quranBtn.setOnClickListener {
             // navigate to quraan
+            navController.navigate(R.id.quranFragment)
         }
 
         transparentStatusBar()
@@ -87,6 +88,26 @@ class MainActivity : AppCompatActivity(), FragmentChangeListener {
 
                         txtQuran.setTextColor(resources.getColor(R.color.white,this@MainActivity.theme))
                         quranIcon.setColorFilter(ContextCompat.getColor(this@MainActivity, R.color.white), android.graphics.PorterDuff.Mode.MULTIPLY)
+
+                        txtMore.setTextColor(resources.getColor(R.color.white,this@MainActivity.theme))
+                        moreIcon.setColorFilter(ContextCompat.getColor(this@MainActivity, R.color.white), android.graphics.PorterDuff.Mode.MULTIPLY)
+
+                        txtHome.setTextColor(resources.getColor(R.color.white,this@MainActivity.theme))
+                        homeIcon.setColorFilter(ContextCompat.getColor(this@MainActivity, R.color.white), android.graphics.PorterDuff.Mode.MULTIPLY)
+                    }
+                }
+                R.id.quranFragment -> {
+                    binding.apply {
+                        txtQibla.setBackgroundResource(0)
+                        txtMore.setBackgroundResource(0)
+                        txtHome.setBackgroundResource(0)
+                        txtQuran.setBackgroundResource(R.drawable.pointer)
+
+                        txtQuran.setTextColor(resources.getColor(R.color.alpha_white,this@MainActivity.theme))
+                        quranIcon.setColorFilter(ContextCompat.getColor(this@MainActivity, R.color.alpha_white), android.graphics.PorterDuff.Mode.MULTIPLY)
+
+                        txtQibla.setTextColor(resources.getColor(R.color.white,this@MainActivity.theme))
+                        qiblaIcon.setColorFilter(ContextCompat.getColor(this@MainActivity, R.color.white), android.graphics.PorterDuff.Mode.MULTIPLY)
 
                         txtMore.setTextColor(resources.getColor(R.color.white,this@MainActivity.theme))
                         moreIcon.setColorFilter(ContextCompat.getColor(this@MainActivity, R.color.white), android.graphics.PorterDuff.Mode.MULTIPLY)

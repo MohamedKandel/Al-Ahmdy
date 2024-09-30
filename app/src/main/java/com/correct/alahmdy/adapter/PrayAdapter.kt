@@ -13,6 +13,8 @@ import com.correct.alahmdy.data.home.PrayingTimeModel
 import com.correct.alahmdy.helper.ClickListener
 import com.correct.alahmdy.helper.Constants.ADAPTER
 import com.correct.alahmdy.helper.Constants.MUTE
+import com.correct.alahmdy.helper.hide
+import com.correct.alahmdy.helper.show
 
 class PrayAdapter(
     private var list: List<PrayingTimeModel>,
@@ -29,10 +31,14 @@ class PrayAdapter(
         holder.txt_pray_name.text = model.prayName
         holder.txt_pray_time.text = model.prayTime
         holder.txt_pray_time_aa.text = model.prayTimeAA
-        if (model.isMute) {
+        if (model.isMute == 0) {
+            holder.isMute_btn.show()
             holder.isMute_btn.setImageResource(R.drawable.mute_icon)
-        } else {
+        } else if(model.isMute == 1) {
+            holder.isMute_btn.show()
             holder.isMute_btn.setImageResource(R.drawable.sound_icon)
+        } else {
+            holder.isMute_btn.hide()
         }
     }
 
@@ -56,13 +62,13 @@ class PrayAdapter(
             isMute_btn.setOnClickListener {
                 val bundle = Bundle()
                 bundle.putInt(ADAPTER,1)
-                if (list[adapterPosition].isMute) {
+                if (list[adapterPosition].isMute == 0) {
                     isMute_btn.setImageResource(R.drawable.sound_icon)
-                    list[adapterPosition].isMute = false
+                    list[adapterPosition].isMute = 1
                     bundle.putBoolean(MUTE,false)
                 } else {
                     isMute_btn.setImageResource(R.drawable.mute_icon)
-                    list[adapterPosition].isMute = true
+                    list[adapterPosition].isMute = 0
                     bundle.putBoolean(MUTE,true)
                 }
                 listener.onItemClickListener(adapterPosition, bundle)

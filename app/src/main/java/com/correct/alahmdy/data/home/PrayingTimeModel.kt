@@ -4,5 +4,5 @@ data class PrayingTimeModel(
     val prayName: String,
     val prayTime: String,
     val prayTimeAA: String,
-    var isMute: Boolean
+    var isMute: Int         // 0 for mute, 1 for un-mute and -1 for hide icon
 )

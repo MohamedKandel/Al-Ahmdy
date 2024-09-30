@@ -30,4 +30,9 @@
         android:name="com.correct.alahmdy.ui.qibla.QiblaFragment"
         android:label="fragment_qibla"
         tools:layout="@layout/fragment_qibla" />
+    <fragment
+        android:id="@+id/quranFragment"
+        android:name="com.correct.alahmdy.ui.quraan.QuranFragment"
+        android:label="fragment_quraan"
+        tools:layout="@layout/fragment_quraan" />
 </navigation>
