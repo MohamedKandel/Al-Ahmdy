@@ -14,10 +14,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.fragment.findNavController
 import com.correct.alahmdy.R
 import com.correct.alahmdy.databinding.FragmentQiblaBinding
 import com.correct.alahmdy.helper.Constants.CAST_ERROR
 import com.correct.alahmdy.helper.FragmentChangeListener
+import com.correct.alahmdy.helper.onBackPressed
 import com.ib.qiblafinder.QiblaDegreeListener
 import io.github.derysudrajat.compassqibla.CompassQibla
 
@@ -57,6 +59,16 @@ class QiblaFragment : Fragment() {
             override fun onDegreeChange(degree: Float) {
                 Log.d("Degree listener", "$degree")
                 binding.txtAngle.text = "$degree°"
+            }
+        }
+
+        onBackPressed {
+            findNavController().navigate(R.id.homeFragment)
+        }
+
+        binding.headerLayout.apply {
+            btnBack.setOnClickListener {
+                findNavController().navigate(R.id.homeFragment)
             }
         }
 

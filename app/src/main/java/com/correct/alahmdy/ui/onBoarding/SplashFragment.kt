@@ -8,12 +8,16 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.correct.alahmdy.R
 import com.correct.alahmdy.databinding.FragmentSplashBinding
 import com.correct.alahmdy.helper.Constants.CAST_ERROR
+import com.correct.alahmdy.helper.Constants.CITY
 import com.correct.alahmdy.helper.FragmentChangeListener
 import com.correct.alahmdy.helper.onBackPressed
+import com.mkandeel.datastore.DataStorage
+import kotlinx.coroutines.launch
 
 
 class SplashFragment : Fragment() {
@@ -23,6 +27,7 @@ class SplashFragment : Fragment() {
     private var milliFinished: Long = 0
     private var countDownTimer: CountDownTimer? = null
     private lateinit var listener: FragmentChangeListener
+    private lateinit var dataStore: DataStorage
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -48,6 +53,7 @@ class SplashFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         binding = FragmentSplashBinding.inflate(inflater,container,false)
+        dataStore = DataStorage.getInstance(requireContext())
         startSplash()
 
         onBackPressed {
@@ -69,7 +75,14 @@ class SplashFragment : Fragment() {
             override fun onFinish() {
                 // navigate to onBoarding
                 Log.i(TAG, "onFinish: ${milliFinished}")
-                findNavController().navigate(R.id.detectLocationFragment)
+                lifecycleScope.launch {
+                    val city = dataStore.getString(requireContext(),CITY)?: ""
+                    if (city.isEmpty()) {
+                        findNavController().navigate(R.id.detectLocationFragment)
+                    } else {
+                        findNavController().navigate(R.id.homeFragment)
+                    }
+                }
             }
         }.start()
     }

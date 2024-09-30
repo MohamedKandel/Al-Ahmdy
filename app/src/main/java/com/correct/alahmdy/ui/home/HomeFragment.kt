@@ -2,6 +2,7 @@ package com.correct.alahmdy.ui.home
 
 import AdOnsAdapter
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -21,6 +22,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.correct.alahmdy.R
 import com.correct.alahmdy.adapter.PrayAdapter
 import com.correct.alahmdy.data.home.AdOnsModel
@@ -32,8 +34,15 @@ import com.correct.alahmdy.helper.Constants.CAST_ERROR
 import com.correct.alahmdy.helper.Constants.CITY
 import com.correct.alahmdy.helper.Constants.MUTE
 import com.correct.alahmdy.helper.FragmentChangeListener
+import com.correct.alahmdy.helper.onBackPressed
 import com.mkandeel.datastore.DataStorage
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.time.LocalTime
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import kotlin.math.min
 
 class HomeFragment : Fragment(), ClickListener {
 
@@ -114,6 +123,7 @@ class HomeFragment : Fragment(), ClickListener {
         changeListener.onFragmentChangeListener(R.id.homeFragment)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -137,19 +147,119 @@ class HomeFragment : Fragment(), ClickListener {
         fillPrayingTime()
         fillAdOns()
 
+        val list = temp()
+        binding.txtTime.viewTreeObserver.addOnGlobalLayoutListener {
+            println("${binding.txtTime.text} ${binding.txtAa.text}")
+            val current = parseTime("${binding.txtTime.text} ${binding.txtAa.text}")
+            val (nearestNextTime, differenceInMinutes) = getNearestNextTimeAndDifference(current, list)
+
+            // Print the nearest next time (formatted back to "hh:mm a")
+            nearestNextTime?.let {
+                val outputFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
+                println("Nearest next time: ${outputFormat.format(it.time)}")
+                //println("Difference: $differenceInMinutes minutes")
+                println("Difference: ${formatDifference(differenceInMinutes)}")
+                println("Next pray : ${getPrayNameByTime(outputFormat.format(it.time))}")
+                binding.txtRemaining.text = "${getPrayNameByTime(outputFormat.format(it.time))} ${formatDifference(differenceInMinutes)}"
+            } ?: println("No times found.")
+        }
+
         binding.adOnsRecyclerView.adapter = adOnAdapter
         binding.prayingTimeRecyclerView.adapter = prayAdapter
+
+        onBackPressed {
+            requireActivity().finish()
+        }
 
         return binding.root
     }
 
+    private fun formatDifference(minutes: Long): String {
+        val hours = getHours(minutes.toInt())
+        val minutes = getMin(minutes.toInt())
+        return if(hours == 0) {
+            "$minutes minutes left"
+        } else {
+            "$hours hours and $minutes minutes left"
+        }
+    }
+
+    private fun temp():List<Calendar> {
+        val prayTime = mutableListOf<String>()
+        for (pray in prayList) {
+            prayTime.add("${pray.prayTime} ${pray.prayTimeAA}")
+        }
+        val fajr = parseTime(prayTime[0])
+        val duhr = parseTime(prayTime[2])
+        val asr = parseTime(prayTime[3])
+        val maghrib = parseTime(prayTime[4])
+        val ishaa = parseTime(prayTime[5])
+
+        return listOfNotNull(fajr, duhr, asr, maghrib, ishaa)
+    }
+
+    fun getNearestNextTimeAndDifference(currentTime: Calendar, times: List<Calendar>): Pair<Calendar?, Long> {
+        // Filter out times that are before or equal to the current time
+        val futureTimes = times.filter { it.after(currentTime) }
+
+        // Get the nearest future time or the first time in the list if no future time is found
+        val nearestNextTime = futureTimes.minByOrNull { it.timeInMillis - currentTime.timeInMillis } ?: times.firstOrNull()
+
+        // Calculate the difference in minutes
+        val differenceInMinutes = nearestNextTime?.let {
+            val diffInMillis = it.timeInMillis - currentTime.timeInMillis
+            diffInMillis / (60 * 1000)  // Convert milliseconds to minutes
+        } ?: 0L  // If nearestNextTime is null, return 0
+
+        return Pair(nearestNextTime, differenceInMinutes)
+    }
+
+    private fun parseTime(timeString: String): Calendar {
+        return try {
+            val inputFormat = SimpleDateFormat("hh:mm aa", Locale.getDefault())
+            val date = inputFormat.parse(timeString)
+            Calendar.getInstance().apply {
+                time = date!!
+                set(Calendar.SECOND, 0)  // Clear the seconds field for accurate comparison
+                set(Calendar.MILLISECOND, 0)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Calendar.getInstance()
+        }
+    }
+
+    private fun getPrayNameByTime(prayTime: String): String {
+        for (pray in prayList) {
+            val temp = "${pray.prayTime} ${pray.prayTimeAA}"
+            println("time from list : $temp")
+            println("given time : $prayTime")
+            if (prayTime.equals(temp,true)) {
+                return pray.prayName
+            }
+        }
+        return ""
+    }
+
+    private fun getHours(minutes:Int): Int {
+        var count = 0
+        var newMinutes = minutes
+        while(newMinutes >= 60) {
+            newMinutes = newMinutes.minus(60)
+            count++
+        }
+        return count
+    }
+
+    private fun getMin(minutes:Int): Int = minutes%60
+
     private fun fillPrayingTime() {
-        prayList.add(PrayingTimeModel("Fajr", "4:37", "AM", false))
-        prayList.add(PrayingTimeModel("Shuruq", "5:56", "AM", true))
-        prayList.add(PrayingTimeModel("Dahur", "12:50", "PM", false))
-        prayList.add(PrayingTimeModel("Asr", "4:30", "PM", false))
-        prayList.add(PrayingTimeModel("Maghrib", "6:25", "PM", false))
-        prayList.add(PrayingTimeModel("Ishaa", "8:47", "PM", false))
+        prayList.add(PrayingTimeModel("Fajr", "04:37", "AM", false))     //0
+        prayList.add(PrayingTimeModel("Shuruq", "05:56", "AM", true))    //1
+        prayList.add(PrayingTimeModel("Dahur", "12:50", "PM", false))   //2
+        prayList.add(PrayingTimeModel("Asr", "04:35", "PM", false))      //3
+        prayList.add(PrayingTimeModel("Maghrib", "06:25", "PM", false))  //4
+        prayList.add(PrayingTimeModel("Ishaa", "08:47", "PM", false))    //5
 
         binding.qiamPray.apply {
             txtPrayName.text = "Qiam"

@@ -70,6 +70,15 @@ fun String.decrypt(key: SecretKey, iv: ByteArray): String {
     return String(decryptedBytes, Charsets.UTF_8)
 }
 
+fun TextClock.get(type: TextClockConst = TextClockConst.AA, regex: String = ""): String {
+    val arr = this.text.split(regex)
+    return when (type) {
+        TextClockConst.HOUR -> arr[0].trim()
+        TextClockConst.MINUTE -> arr[1].trim()
+        TextClockConst.AA -> return this.text.toString()
+    }
+}
+
 fun View.hide() {
     this.visibility = View.GONE
 }
@@ -86,7 +95,8 @@ fun String.getAa(): String {
         if (!(c == '0' || c == '1' || c == '2' ||
                     c == '3' || c == '4' || c == '5' ||
                     c == '6' || c == '7' || c == '8' ||
-                    c == '9')) {
+                    c == '9')
+        ) {
             strBuilder.append(c)
         }
     }
@@ -101,7 +111,8 @@ fun String.getTime(): String {
         if (c == '0' || c == '1' || c == '2' ||
             c == '3' || c == '4' || c == '5' ||
             c == '6' || c == '7' || c == '8' ||
-            c == '9' || c == ':') {
+            c == '9' || c == ':'
+        ) {
             strBuilder.append(c)
         }
     }

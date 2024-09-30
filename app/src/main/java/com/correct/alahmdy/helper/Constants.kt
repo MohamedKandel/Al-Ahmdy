@@ -13,4 +13,5 @@ object Constants {
     const val CLICKED = "clicked"
     const val ITEM = "item"
     const val ADAPTER = "adapter"
+    const val SOURCE = "come from"
 }
