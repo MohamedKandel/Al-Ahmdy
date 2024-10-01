@@ -226,7 +226,7 @@ class DetectLocationFragment : Fragment() {
                     )
                     val city = value.address.city ?: value.address.state
                     dataStore.putString(requireContext(), CITY, city)
-                    dataStore.putString(requireContext(), COUNTRY_CODE, value.address.country_code)
+                    dataStore.putString(requireContext(), COUNTRY_CODE, value.address.country_code.trim())
                     dataStore.putString(requireContext(), LATITUDE, latitude.toString())
                     dataStore.putString(requireContext(), LONGITUDE, longitude.toString())
                     findNavController().navigate(R.id.registerFragment)

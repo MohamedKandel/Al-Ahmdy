@@ -36,6 +36,7 @@ import com.correct.alahmdy.helper.ClickListener
 import com.correct.alahmdy.helper.Constants.ADAPTER
 import com.correct.alahmdy.helper.Constants.CAST_ERROR
 import com.correct.alahmdy.helper.Constants.CITY
+import com.correct.alahmdy.helper.Constants.COUNTRY_CODE
 import com.correct.alahmdy.helper.Constants.LATITUDE
 import com.correct.alahmdy.helper.Constants.LONGITUDE
 import com.correct.alahmdy.helper.Constants.MUTE
@@ -333,7 +334,13 @@ class HomeFragment : Fragment(), ClickListener {
         lifecycleScope.launch {
             val lat = dataStore.getString(requireContext(), LATITUDE) ?: ""
             val long = dataStore.getString(requireContext(), LONGITUDE) ?: ""
-            viewModel.getPrayTime(date, lat, long, 5)
+            val countryCode = dataStore.getString(requireContext(), COUNTRY_CODE)?: ""
+            val method = if (countryCode.trim().equals("ly") || countryCode.trim().equals("eg")) {
+                5
+            } else {
+                4
+            }
+            viewModel.getPrayTime(date, lat, long, method)
             val observer = object : Observer<PrayTimeResponse> {
                 override fun onChanged(value: PrayTimeResponse) {
                     val hijri = "${value.data.date.hijri.day} ${value.data.date.hijri.month.en} ${value.data.date.hijri.year}"
