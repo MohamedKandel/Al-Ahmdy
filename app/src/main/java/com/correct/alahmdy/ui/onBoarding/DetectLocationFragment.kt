@@ -28,6 +28,7 @@ import com.correct.alahmdy.databinding.FragmentDetectLocationBinding
 import com.correct.alahmdy.helper.Constants.CAST_ERROR
 import com.correct.alahmdy.helper.Constants.CITY
 import com.correct.alahmdy.helper.Constants.COUNTRY
+import com.correct.alahmdy.helper.Constants.COUNTRY_CODE
 import com.correct.alahmdy.helper.Constants.LATITUDE
 import com.correct.alahmdy.helper.Constants.LONGITUDE
 import com.correct.alahmdy.helper.FragmentChangeListener
@@ -225,6 +226,7 @@ class DetectLocationFragment : Fragment() {
                     )
                     val city = value.address.city ?: value.address.state
                     dataStore.putString(requireContext(), CITY, city)
+                    dataStore.putString(requireContext(), COUNTRY_CODE, value.address.country_code)
                     dataStore.putString(requireContext(), LATITUDE, latitude.toString())
                     dataStore.putString(requireContext(), LONGITUDE, longitude.toString())
                     findNavController().navigate(R.id.registerFragment)

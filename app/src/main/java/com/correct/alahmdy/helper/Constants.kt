@@ -8,6 +8,7 @@ object Constants {
     const val ERROR_API = "Error in api request"
     const val COUNTRY = "country"
     const val CITY = "city"
+    const val COUNTRY_CODE = "country code"
     const val LATITUDE = "latitude"
     const val LONGITUDE = "longitude"
     const val CAST_ERROR = "MainActivity doesn't implement interface"
