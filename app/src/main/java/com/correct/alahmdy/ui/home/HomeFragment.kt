@@ -22,20 +22,28 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.correct.alahmdy.R
 import com.correct.alahmdy.adapter.PrayAdapter
 import com.correct.alahmdy.data.home.AdOnsModel
 import com.correct.alahmdy.data.home.PrayingTimeModel
+import com.correct.alahmdy.data.pray.PrayTimeResponse
 import com.correct.alahmdy.databinding.FragmentHomeBinding
 import com.correct.alahmdy.helper.ClickListener
 import com.correct.alahmdy.helper.Constants.ADAPTER
 import com.correct.alahmdy.helper.Constants.CAST_ERROR
 import com.correct.alahmdy.helper.Constants.CITY
+import com.correct.alahmdy.helper.Constants.LATITUDE
+import com.correct.alahmdy.helper.Constants.LONGITUDE
 import com.correct.alahmdy.helper.Constants.MUTE
 import com.correct.alahmdy.helper.FragmentChangeListener
+import com.correct.alahmdy.helper.getAa
+import com.correct.alahmdy.helper.getTime
 import com.correct.alahmdy.helper.onBackPressed
+import com.correct.alahmdy.helper.reformat24HourTime
 import com.mkandeel.datastore.DataStorage
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -54,7 +62,8 @@ class HomeFragment : Fragment(), ClickListener {
     private lateinit var adOnAdapter: AdOnsAdapter
     private lateinit var changeListener: FragmentChangeListener
     private lateinit var dataStore: DataStorage
-    private lateinit var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener
+    private lateinit var viewModel: HomeViewModel
+    private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
     private val notificationLauncher: ActivityResultLauncher<String> =
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()
@@ -123,6 +132,7 @@ class HomeFragment : Fragment(), ClickListener {
     override fun onResume() {
         super.onResume()
         changeListener.onFragmentChangeListener(R.id.homeFragment)
+        binding.txtTime.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
     }
 
     override fun onPause() {
@@ -142,6 +152,7 @@ class HomeFragment : Fragment(), ClickListener {
         adOnsList = mutableListOf()
         adOnAdapter = AdOnsAdapter(adOnsList, this)
         dataStore = DataStorage.getInstance(requireContext())
+        viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestNotificationPermission()
@@ -150,6 +161,11 @@ class HomeFragment : Fragment(), ClickListener {
         lifecycleScope.launch {
             binding.txtCity.text = dataStore.getString(requireContext(), CITY)
         }
+
+        val tempTime = "18:40".reformat24HourTime()
+        Log.e("Reformat 24 hour time", tempTime)
+        Log.e("Reformat 24 hour time", tempTime.getAa())
+        Log.e("Reformat 24 hour time", tempTime.getTime())
 
         fillPrayingTime()
         fillAdOns()
@@ -176,7 +192,7 @@ class HomeFragment : Fragment(), ClickListener {
             } ?: println("No times found.")
         }
 
-        binding.txtTime.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
+        //binding.txtTime.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
 
         binding.adOnsRecyclerView.adapter = adOnAdapter
         binding.prayingTimeRecyclerView.adapter = prayAdapter
@@ -212,7 +228,7 @@ class HomeFragment : Fragment(), ClickListener {
         return listOfNotNull(fajr, duhr, asr, maghrib, ishaa)
     }
 
-    fun getNearestNextTimeAndDifference(
+    private fun getNearestNextTimeAndDifference(
         currentTime: Calendar,
         times: List<Calendar>
     ): Pair<Calendar?, Long> {
@@ -225,8 +241,18 @@ class HomeFragment : Fragment(), ClickListener {
 
         // Calculate the difference in minutes
         val differenceInMinutes = nearestNextTime?.let {
-            val diffInMillis = it.timeInMillis - currentTime.timeInMillis
-            diffInMillis / (60 * 1000)  // Convert milliseconds to minutes
+            if (it.before(currentTime)) {
+                // If the nearest next time is before or equal to current time, it means it is on the next day
+                val tempCalendar = Calendar.getInstance().apply {
+                    timeInMillis = it.timeInMillis
+                    add(Calendar.DAY_OF_YEAR, 1)  // Add 1 day for wrap-around to next day
+                }
+                val diffInMillis = tempCalendar.timeInMillis - currentTime.timeInMillis
+                diffInMillis / (60 * 1000)  // Convert milliseconds to minutes
+            } else {
+                val diffInMillis = it.timeInMillis - currentTime.timeInMillis
+                diffInMillis / (60 * 1000)  // Convert milliseconds to minutes
+            }
         } ?: 0L  // If nearestNextTime is null, return 0
 
         return Pair(nearestNextTime, differenceInMinutes)
@@ -300,7 +326,24 @@ class HomeFragment : Fragment(), ClickListener {
                 }
             }
         }
+        //////////////////////////////////////////////////////////////////
+        val d = Date()
+        val date = SimpleDateFormat("dd-MM-yyyy").format(d)
+        Log.v("Reformat 24 hour time", date)
+        lifecycleScope.launch {
+            val lat = dataStore.getString(requireContext(), LATITUDE) ?: ""
+            val long = dataStore.getString(requireContext(), LONGITUDE) ?: ""
+            viewModel.getPrayTime(date, lat, long, 5)
+            val observer = object : Observer<PrayTimeResponse> {
+                override fun onChanged(value: PrayTimeResponse) {
+                    val hijri = "${value.data.date.hijri.day} ${value.data.date.hijri.month.en} ${value.data.date.hijri.year}"
+                    binding.txtHijriDate.text = hijri
 
+                    viewModel.prayTimeResponse.removeObserver(this)
+                }
+            }
+            viewModel.prayTimeResponse.observe(viewLifecycleOwner,observer)
+        }
 
         prayAdapter.updateAdapter(prayList)
     }

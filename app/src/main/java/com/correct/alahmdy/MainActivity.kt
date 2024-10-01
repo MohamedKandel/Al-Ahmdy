@@ -30,7 +30,8 @@ class MainActivity : AppCompatActivity(), FragmentChangeListener {
         hiddenFragment = arrayOf(
             R.id.splashFragment,
             R.id.detectLocationFragment,
-            R.id.registerFragment
+            R.id.registerFragment,
+            R.id.surahFragment
         )
 
         binding.homeBtn.setOnClickListener {

@@ -28,8 +28,11 @@ import com.correct.alahmdy.databinding.FragmentDetectLocationBinding
 import com.correct.alahmdy.helper.Constants.CAST_ERROR
 import com.correct.alahmdy.helper.Constants.CITY
 import com.correct.alahmdy.helper.Constants.COUNTRY
+import com.correct.alahmdy.helper.Constants.LATITUDE
+import com.correct.alahmdy.helper.Constants.LONGITUDE
 import com.correct.alahmdy.helper.FragmentChangeListener
 import com.correct.alahmdy.helper.onBackPressed
+import com.correct.alahmdy.retrofit.RetrofitLocationClient
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
@@ -220,7 +223,10 @@ class DetectLocationFragment : Fragment() {
                         COUNTRY,
                         value.address.country
                     )
-                    dataStore.putString(requireContext(), CITY, value.address.city)
+                    val city = value.address.city ?: value.address.state
+                    dataStore.putString(requireContext(), CITY, city)
+                    dataStore.putString(requireContext(), LATITUDE, latitude.toString())
+                    dataStore.putString(requireContext(), LONGITUDE, longitude.toString())
                     findNavController().navigate(R.id.registerFragment)
                 }
                 viewModel.locationResponse.removeObserver(this)

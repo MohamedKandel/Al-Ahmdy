@@ -35,4 +35,9 @@
         android:name="com.correct.alahmdy.ui.quraan.QuranFragment"
         android:label="fragment_quraan"
         tools:layout="@layout/fragment_quraan" />
+    <fragment
+        android:id="@+id/surahFragment"
+        android:name="com.correct.alahmdy.ui.quraan.SurahFragment"
+        android:label="fragment_surah"
+        tools:layout="@layout/fragment_surah" />
 </navigation>

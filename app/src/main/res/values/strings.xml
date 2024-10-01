@@ -23,4 +23,13 @@
     <string name="qibla_direction">Qibla angle of your location</string>
     <string name="qibla_title">Qibla direction</string>
     <string name="last_read">Last Read</string>
+    <string name="surah">Surah</string>
+    <string name="page">Page</string>
+    <string name="juz">Juz</string>
+    <string name="hizb">Hizb</string>
+    <string name="al_quraan">Al-Quran</string>
+    <string name="auto_scroll">Auto Scroll</string>
+    <string name="planner">Planner</string>
+    <string name="play">Play audio</string>
+    <string name="bookmark">Bookmark</string>
 </resources>

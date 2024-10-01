@@ -1,10 +1,14 @@
 package com.correct.alahmdy.helper
 
+import android.animation.ValueAnimator
 import android.app.Activity
 import android.graphics.Color
 import android.util.Base64
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
+import android.view.animation.LinearInterpolator
+import android.widget.ImageView
 import android.widget.TextClock
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -100,7 +104,7 @@ fun String.getAa(): String {
             strBuilder.append(c)
         }
     }
-    return strBuilder.toString()
+    return strBuilder.toString().replace(":","").trim()
 }
 
 // call to get Time and set it to text clock
@@ -139,4 +143,22 @@ fun Long.convertTimestampToTimeString(): String {
     val date = Date(this)
     // Format the Date object into the time string
     return timeFormat.format(date)
+}
+
+fun String.reformat24HourTime(): String {
+    // 18:40   = 6:40 PM
+    val arr = this.split(":")       //[18,40]
+    var aa = ""
+    Log.v("Reformat 24 hour time", "${arr[0].toInt()}")
+    Log.v("Reformat 24 hour time",arr[1])
+    var hour = arr[0].toInt()
+    if (arr[0].toInt() > 12) {
+        hour = arr[0].toInt() - 12
+        aa = "PM"
+    } else {
+        aa = "AM"
+    }
+    Log.d("Reformat 24 hour time", "$hour")
+
+    return "${hour}:${arr[1]} $aa"
 }
