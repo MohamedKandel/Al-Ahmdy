@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.util.concurrent.TimeUnit
 
-object RetrofitLocationClient {
+object RetrofitClient {
     fun getClient(baseURL: String): Retrofit {
         val interceptor = HttpLoggingInterceptor().apply {
             setLevel(HttpLoggingInterceptor.Level.BODY)

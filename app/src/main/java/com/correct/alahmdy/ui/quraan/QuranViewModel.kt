@@ -8,11 +8,11 @@ import androidx.lifecycle.viewModelScope
 import com.correct.alahmdy.data.quran.SurahNamesResponse
 import com.correct.alahmdy.helper.Constants.SURAH_META_DATA_BASE_URL
 import com.correct.alahmdy.retrofit.APIService
-import com.correct.alahmdy.retrofit.RetrofitLocationClient
+import com.correct.alahmdy.retrofit.RetrofitClient
 import kotlinx.coroutines.launch
 
 class QuranViewModel(application: Application): AndroidViewModel(application) {
-    private val repo: QuranRepository = QuranRepository(RetrofitLocationClient
+    private val repo: QuranRepository = QuranRepository(RetrofitClient
         .getClient(SURAH_META_DATA_BASE_URL).create(APIService::class.java))
 
     private val _surahsNamesResponse = MutableLiveData<SurahNamesResponse>()

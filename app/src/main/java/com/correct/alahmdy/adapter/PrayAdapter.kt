@@ -33,10 +33,10 @@ class PrayAdapter(
         holder.txt_pray_time_aa.text = model.prayTimeAA
         if (model.isMute == 0) {
             holder.isMute_btn.show()
-            holder.isMute_btn.setImageResource(R.drawable.mute_icon)
+            holder.isMute_btn.setImageResource(R.drawable.sound_icon)
         } else if(model.isMute == 1) {
             holder.isMute_btn.show()
-            holder.isMute_btn.setImageResource(R.drawable.sound_icon)
+            holder.isMute_btn.setImageResource(R.drawable.mute_icon)
         } else {
             holder.isMute_btn.hide()
         }
@@ -65,11 +65,11 @@ class PrayAdapter(
                 if (list[adapterPosition].isMute == 0) {
                     isMute_btn.setImageResource(R.drawable.sound_icon)
                     list[adapterPosition].isMute = 1
-                    bundle.putBoolean(MUTE,false)
+                    bundle.putBoolean(MUTE,true)
                 } else {
                     isMute_btn.setImageResource(R.drawable.mute_icon)
                     list[adapterPosition].isMute = 0
-                    bundle.putBoolean(MUTE,true)
+                    bundle.putBoolean(MUTE,false)
                 }
                 listener.onItemClickListener(adapterPosition, bundle)
             }

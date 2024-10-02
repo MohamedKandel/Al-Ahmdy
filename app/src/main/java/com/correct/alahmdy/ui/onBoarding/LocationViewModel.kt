@@ -13,12 +13,12 @@ import com.correct.alahmdy.helper.Constants.REVERSE_LOCATION_BASE_URL
 import com.correct.alahmdy.helper.decrypt
 import com.correct.alahmdy.helper.generateKeyFromString
 import com.correct.alahmdy.retrofit.APIService
-import com.correct.alahmdy.retrofit.RetrofitLocationClient
+import com.correct.alahmdy.retrofit.RetrofitClient
 import kotlinx.coroutines.launch
 
 class LocationViewModel(application: Application) : AndroidViewModel(application) {
     private val repo: LocationRepository = LocationRepository(
-        RetrofitLocationClient.getClient(REVERSE_LOCATION_BASE_URL)
+        RetrofitClient.getClient(REVERSE_LOCATION_BASE_URL)
             .create(APIService::class.java)
     )
 

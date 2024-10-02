@@ -155,6 +155,8 @@ fun String.reformat24HourTime(): String {
     if (arr[0].toInt() > 12) {
         hour = arr[0].toInt() - 12
         aa = "PM"
+    } else if (arr[0].toInt() == 12) {
+        aa = "PM"
     } else {
         aa = "AM"
     }

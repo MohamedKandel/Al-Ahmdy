@@ -33,7 +33,6 @@ import com.correct.alahmdy.helper.Constants.LATITUDE
 import com.correct.alahmdy.helper.Constants.LONGITUDE
 import com.correct.alahmdy.helper.FragmentChangeListener
 import com.correct.alahmdy.helper.onBackPressed
-import com.correct.alahmdy.retrofit.RetrofitLocationClient
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest

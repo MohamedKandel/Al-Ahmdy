@@ -11,7 +11,6 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,11 +20,10 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import com.correct.alahmdy.R
 import com.correct.alahmdy.adapter.PrayAdapter
 import com.correct.alahmdy.data.home.AdOnsModel
@@ -44,17 +42,16 @@ import com.correct.alahmdy.helper.FragmentChangeListener
 import com.correct.alahmdy.helper.getAa
 import com.correct.alahmdy.helper.getTime
 import com.correct.alahmdy.helper.onBackPressed
+import com.correct.alahmdy.helper.onDataFetched
 import com.correct.alahmdy.helper.reformat24HourTime
 import com.mkandeel.datastore.DataStorage
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.time.LocalTime
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import kotlin.math.min
 
-class HomeFragment : Fragment(), ClickListener {
+class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> {
 
     private lateinit var binding: FragmentHomeBinding
     private lateinit var prayList: MutableList<PrayingTimeModel>
@@ -133,12 +130,16 @@ class HomeFragment : Fragment(), ClickListener {
     override fun onResume() {
         super.onResume()
         changeListener.onFragmentChangeListener(R.id.homeFragment)
-        binding.txtTime.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
+        if (globalLayoutListener != null) {
+            binding.txtTime.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
+        }
     }
 
     override fun onPause() {
         super.onPause()
-        binding.txtTime.viewTreeObserver.removeOnGlobalLayoutListener(globalLayoutListener)
+        if (globalLayoutListener != null) {
+            binding.txtTime.viewTreeObserver.removeOnGlobalLayoutListener(globalLayoutListener)
+        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -171,27 +172,31 @@ class HomeFragment : Fragment(), ClickListener {
         fillPrayingTime()
         fillAdOns()
 
-        val list = temp()
-        globalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
-            println("${binding.txtTime.text} ${binding.txtAa.text}")
-            val current = parseTime("${binding.txtTime.text} ${binding.txtAa.text}")
-            val (nearestNextTime, differenceInMinutes) = getNearestNextTimeAndDifference(
-                current,
-                list
-            )
+        binding.txtDate.text = gregorianDate()
 
-            // Print the nearest next time (formatted back to "hh:mm a")
-            nearestNextTime?.let {
-                val outputFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
-                println("Nearest next time: ${outputFormat.format(it.time)}")
-                println("Difference: ${formatDifference(differenceInMinutes)}")
-                println("Next pray : ${getPrayNameByTime(outputFormat.format(it.time))}")
-                binding.txtRemaining.text =
-                    "${getPrayNameByTime(outputFormat.format(it.time))} ${
-                        formatDifference(differenceInMinutes)
-                    }"
-            } ?: println("No times found.")
-        }
+//        val list = temp()
+//
+//        globalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
+//            println("${binding.txtTime.text} ${binding.txtAa.text}")
+//            val current = parseTime("${binding.txtTime.text} ${binding.txtAa.text}")
+//            val (nearestNextTime, differenceInMinutes) = getNearestNextTimeAndDifference(
+//                current,
+//                list
+//            )
+//
+//            // Print the nearest next time (formatted back to "hh:mm a")
+//            nearestNextTime?.let {
+//                val outputFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
+//                println("Nearest next time: ${outputFormat.format(it.time)}")
+//                println("Difference: ${formatDifference(differenceInMinutes)}")
+//                println("Next pray : ${getPrayNameByTime(outputFormat.format(it.time))}")
+//                binding.txtRemaining.text =
+//                    "${getPrayNameByTime(outputFormat.format(it.time))} ${
+//                        formatDifference(differenceInMinutes)
+//                    }"
+//            } ?: println("No times found.")
+//        }
+
 
         //binding.txtTime.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
 
@@ -205,6 +210,19 @@ class HomeFragment : Fragment(), ClickListener {
         return binding.root
     }
 
+    @SuppressLint("SimpleDateFormat")
+    private fun gregorianDate(): String {
+        val input = SimpleDateFormat("d-MM-yyyy").format(Date())
+        val inFormat = SimpleDateFormat("d-MM-yyyy")
+        val date = inFormat.parse(input)
+        val outFormat = SimpleDateFormat("EEEE")
+        val monthName = SimpleDateFormat("MMMM")
+        val goal = date?.let { outFormat.format(it) }
+        val month = date?.let { monthName.format(it) }
+        val dayYear = input.split("-")      //[dd,MM,yyyy]
+        return "$goal, ${dayYear[0]} $month ${dayYear[2]}"
+    }
+
     private fun formatDifference(minutes: Long): String {
         val hours = getHours(minutes.toInt())
         val minutes = getMin(minutes.toInt())
@@ -215,9 +233,9 @@ class HomeFragment : Fragment(), ClickListener {
         }
     }
 
-    private fun temp(): List<Calendar> {
+    private fun temp(list: List<PrayingTimeModel>): List<Calendar> {
         val prayTime = mutableListOf<String>()
-        for (pray in prayList) {
+        for (pray in list) {
             prayTime.add("${pray.prayTime} ${pray.prayTimeAA}")
         }
         val fajr = parseTime(prayTime[0])
@@ -298,36 +316,6 @@ class HomeFragment : Fragment(), ClickListener {
 
     // fetch data from API here
     private fun fillPrayingTime() {
-        prayList.add(PrayingTimeModel("Fajr", "04:37", "AM", 1))     //0
-        prayList.add(PrayingTimeModel("Shuruq", "05:56", "AM", -1))    //1
-        prayList.add(PrayingTimeModel("Dahur", "12:50", "PM", 1))   //2
-        prayList.add(PrayingTimeModel("Asr", "04:35", "PM", 1))      //3
-        prayList.add(PrayingTimeModel("Maghrib", "06:25", "PM", 0))  //4
-        prayList.add(PrayingTimeModel("Ishaa", "08:47", "PM", 1))    //5
-
-        binding.qiamPray.apply {
-            txtPrayName.text = "Qiam"
-            txtPrayTime.text = "1:20"
-            txtPrayAa.text = "AM"
-            // fetch data from database if user mute Qiam or not
-            var isMute = 0
-            if (isMute == 0) {
-                mutePrayIcon.setImageResource(R.drawable.mute_icon)
-            } else {
-                mutePrayIcon.setImageResource(R.drawable.sound_icon)
-            }
-            mutePrayIcon.setOnClickListener {
-                // check on database value
-                if (isMute == 0) {
-                    mutePrayIcon.setImageResource(R.drawable.sound_icon)
-                    isMute = 1
-                } else {
-                    mutePrayIcon.setImageResource(R.drawable.mute_icon)
-                    isMute = 0
-                }
-            }
-        }
-        //////////////////////////////////////////////////////////////////
         val d = Date()
         val date = SimpleDateFormat("dd-MM-yyyy").format(d)
         Log.v("Reformat 24 hour time", date)
@@ -340,19 +328,48 @@ class HomeFragment : Fragment(), ClickListener {
             } else {
                 4
             }
-            viewModel.getPrayTime(date, lat, long, method)
+            viewModel.getPrayTime(date, lat, long, method, this@HomeFragment)
             val observer = object : Observer<PrayTimeResponse> {
                 override fun onChanged(value: PrayTimeResponse) {
                     val hijri = "${value.data.date.hijri.day} ${value.data.date.hijri.month.en} ${value.data.date.hijri.year}"
                     binding.txtHijriDate.text = hijri
+                    prayList.add(PrayingTimeModel("Fajr",value.data.timings.Fajr.reformat24HourTime().getTime(), value.data.timings.Fajr.reformat24HourTime().getAa(),0))
+                    prayList.add(PrayingTimeModel("Shuruq",value.data.timings.Sunrise.reformat24HourTime().getTime(), value.data.timings.Sunrise.reformat24HourTime().getAa(),-1))
+                    prayList.add(PrayingTimeModel("Dhuhr",value.data.timings.Dhuhr.reformat24HourTime().getTime(), value.data.timings.Dhuhr.reformat24HourTime().getAa(),0))
+                    prayList.add(PrayingTimeModel("Asr",value.data.timings.Asr.reformat24HourTime().getTime(), value.data.timings.Asr.reformat24HourTime().getAa(),0))
+                    prayList.add(PrayingTimeModel("Maghrib",value.data.timings.Maghrib.reformat24HourTime().getTime(), value.data.timings.Maghrib.reformat24HourTime().getAa(),0))
+                    prayList.add(PrayingTimeModel("Isha",value.data.timings.Isha.reformat24HourTime().getTime(), value.data.timings.Isha.reformat24HourTime().getAa(),0))
 
+                    prayAdapter.updateAdapter(prayList)
+
+                    binding.qiamPray.apply {
+                        txtPrayName.text = "Qiam"
+                        txtPrayTime.text = "2:30"
+                        txtPrayAa.text = "AM"
+                        // fetch data from database if user mute Qiam or not
+                        var isMute = 1
+
+                        mutePrayIcon.setImageResource(R.drawable.mute_icon)
+
+                        mutePrayIcon.setOnClickListener {
+                            Log.v("Is Mute mohamed", "$isMute")
+                            // check on database value
+                            if (isMute == 0) {
+                                mutePrayIcon.setImageResource(R.drawable.mute_icon)
+                                isMute = 1
+                            } else {
+                                mutePrayIcon.setImageResource(R.drawable.sound_icon)
+                                isMute = 0
+                            }
+                        }
+                    }
                     viewModel.prayTimeResponse.removeObserver(this)
                 }
             }
             viewModel.prayTimeResponse.observe(viewLifecycleOwner,observer)
         }
 
-        prayAdapter.updateAdapter(prayList)
+
     }
 
     private fun fillAdOns() {
@@ -388,5 +405,41 @@ class HomeFragment : Fragment(), ClickListener {
 
     override fun onItemLongClickListener(position: Int, extras: Bundle?) {
 
+    }
+
+    @SuppressLint("SetTextI18n")
+    override fun onResultFetchedSuccessfull(result: PrayTimeResponse) {
+        val mlist = mutableListOf(
+        PrayingTimeModel("Fajr",result.data.timings.Fajr.reformat24HourTime().getTime(), result.data.timings.Fajr.reformat24HourTime().getAa(),0),
+        PrayingTimeModel("Shuruq",result.data.timings.Sunrise.reformat24HourTime().getTime(), result.data.timings.Sunrise.reformat24HourTime().getAa(),-1),
+        PrayingTimeModel("Dhuhr",result.data.timings.Dhuhr.reformat24HourTime().getTime(), result.data.timings.Dhuhr.reformat24HourTime().getAa(),0),
+        PrayingTimeModel("Asr",result.data.timings.Asr.reformat24HourTime().getTime(), result.data.timings.Asr.reformat24HourTime().getAa(),0),
+        PrayingTimeModel("Maghrib",result.data.timings.Maghrib.reformat24HourTime().getTime(), result.data.timings.Maghrib.reformat24HourTime().getAa(),0),
+        PrayingTimeModel("Isha",result.data.timings.Isha.reformat24HourTime().getTime(), result.data.timings.Isha.reformat24HourTime().getAa(),0)
+        )
+        val list = temp(mlist)
+
+        globalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
+            println("${binding.txtTime.text} ${binding.txtAa.text}")
+            val current = parseTime("${binding.txtTime.text} ${binding.txtAa.text}")
+            val (nearestNextTime, differenceInMinutes) = getNearestNextTimeAndDifference(
+                current,
+                list
+            )
+
+            // Print the nearest next time (formatted back to "hh:mm a")
+            nearestNextTime?.let {
+                val outputFormat = SimpleDateFormat("h:mm aa", Locale.getDefault())
+                println("Nearest next time: ${outputFormat.format(it.time)}")
+                println("Difference: ${formatDifference(differenceInMinutes)}")
+                println("Next pray : ${getPrayNameByTime(outputFormat.format(it.time))}")
+                binding.txtRemaining.text =
+                    "${getPrayNameByTime(outputFormat.format(it.time))} ${
+                        formatDifference(differenceInMinutes)
+                    }"
+            } ?: println("No times found.")
+        }
+
+        binding.txtTime.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
     }
 }
