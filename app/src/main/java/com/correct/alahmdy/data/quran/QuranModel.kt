@@ -4,7 +4,9 @@ import android.os.Parcel
 import android.os.Parcelable
 
 data class QuranModel(
-    val number: Int, val englishName: String, val name: String) : Parcelable {
+    val number: Int,
+    val englishName: String,
+    val name: String) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
         parcel.readString().toString(),

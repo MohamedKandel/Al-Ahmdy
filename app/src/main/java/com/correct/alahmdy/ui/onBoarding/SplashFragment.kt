@@ -16,6 +16,7 @@ import com.correct.alahmdy.helper.Constants.CAST_ERROR
 import com.correct.alahmdy.helper.Constants.CITY
 import com.correct.alahmdy.helper.FragmentChangeListener
 import com.correct.alahmdy.helper.onBackPressed
+import com.correct.alahmdy.room.PrayDB
 import com.mkandeel.datastore.DataStorage
 import kotlinx.coroutines.launch
 
@@ -27,7 +28,8 @@ class SplashFragment : Fragment() {
     private var milliFinished: Long = 0
     private var countDownTimer: CountDownTimer? = null
     private lateinit var listener: FragmentChangeListener
-    private lateinit var dataStore: DataStorage
+    //private lateinit var dataStore: DataStorage
+    private lateinit var prayDB: PrayDB
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -53,7 +55,8 @@ class SplashFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         binding = FragmentSplashBinding.inflate(inflater,container,false)
-        dataStore = DataStorage.getInstance(requireContext())
+        //dataStore = DataStorage.getInstance(requireContext())
+        prayDB = PrayDB.getDBInstance(requireContext())
         startSplash()
 
         onBackPressed {
@@ -76,8 +79,8 @@ class SplashFragment : Fragment() {
                 // navigate to onBoarding
                 Log.i(TAG, "onFinish: ${milliFinished}")
                 lifecycleScope.launch {
-                    val city = dataStore.getString(requireContext(),CITY)?: ""
-                    if (city.isEmpty()) {
+                    val user = prayDB.userDao().getById(1) //dataStore.getString(requireContext(),CITY)?: ""
+                    if (user == null) {
                         findNavController().navigate(R.id.detectLocationFragment)
                     } else {
                         findNavController().navigate(R.id.homeFragment)

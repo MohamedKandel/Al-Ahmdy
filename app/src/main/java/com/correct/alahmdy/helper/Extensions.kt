@@ -124,7 +124,7 @@ fun String.getTime(): String {
 }
 
 fun String.convertTimeToTimestamp(): Long? {
-    val timeFormat = SimpleDateFormat("hh:mm aa", Locale.getDefault())
+    val timeFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
     return try {
         // Parse the time string to a Date object
         val time = timeFormat.parse(this)
@@ -138,7 +138,7 @@ fun String.convertTimeToTimestamp(): Long? {
 
 fun Long.convertTimestampToTimeString(): String {
     // Define the time format (hh:mm:ss aa)
-    val timeFormat = SimpleDateFormat("hh:mm aa", Locale.getDefault())
+    val timeFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
     // Create a Date object from the Long timestamp
     val date = Date(this)
     // Format the Date object into the time string

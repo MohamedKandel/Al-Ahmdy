@@ -24,6 +24,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.correct.alahmdy.R
 import com.correct.alahmdy.data.location.LocationResponse
+import com.correct.alahmdy.data.user.User
 import com.correct.alahmdy.databinding.FragmentDetectLocationBinding
 import com.correct.alahmdy.helper.Constants.CAST_ERROR
 import com.correct.alahmdy.helper.Constants.CITY
@@ -33,6 +34,7 @@ import com.correct.alahmdy.helper.Constants.LATITUDE
 import com.correct.alahmdy.helper.Constants.LONGITUDE
 import com.correct.alahmdy.helper.FragmentChangeListener
 import com.correct.alahmdy.helper.onBackPressed
+import com.correct.alahmdy.room.PrayDB
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
@@ -50,9 +52,25 @@ class DetectLocationFragment : Fragment() {
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationSettingsClient: SettingsClient
     private lateinit var locationSettingsRequest: LocationSettingsRequest
-    private lateinit var dataStore: DataStorage
+
+    //    private lateinit var dataStore: DataStorage
     private lateinit var viewModel: LocationViewModel
     private lateinit var listener: FragmentChangeListener
+    private lateinit var prayDB: PrayDB
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
+        val coarseLocationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
+
+        if (fineLocationGranted || coarseLocationGranted) {
+            // Permission is granted, now check GPS and get location
+            checkGPSAndRequestLocation()
+        } else {
+            // Permission is denied
+            Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
 
 
     override fun onAttach(context: Context) {
@@ -67,21 +85,6 @@ class DetectLocationFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         listener.onFragmentChangeListener(R.id.detectLocationFragment)
-    }
-
-    private val locationPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
-        val coarseLocationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
-
-        if (fineLocationGranted || coarseLocationGranted) {
-            // Permission is granted, now check GPS and get location
-            checkGPSAndRequestLocation()
-        } else {
-            // Permission is denied
-            Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show()
-        }
     }
 
     private fun checkLocationPermission() {
@@ -137,11 +140,16 @@ class DetectLocationFragment : Fragment() {
                 val longitude = it.longitude
                 Log.d("Location", "Latitude: $latitude, Longitude: $longitude")
                 lifecycleScope.launch {
-                    if (dataStore.getString(requireContext(), COUNTRY).isNullOrEmpty()) {
+                    if (prayDB.userDao().getAll()
+                            .isEmpty()
+                    ) {//dataStore.getString(requireContext(), COUNTRY).isNullOrEmpty()) {
                         getCountryName(latitude, longitude)
                     } else {
-                        println(dataStore.getString(requireContext(), COUNTRY))
-                        println(dataStore.getString(requireContext(), CITY))
+                        val userData = prayDB.userDao().getAll()
+                        println(userData[0].country)
+                        println(userData[0].city)
+                        //println(dataStore.getString(requireContext(), COUNTRY))
+                        //println(dataStore.getString(requireContext(), CITY))
                         findNavController().navigate(R.id.registerFragment)
                     }
                 }
@@ -165,7 +173,8 @@ class DetectLocationFragment : Fragment() {
         // Inflate the layout for this fragment
         binding = FragmentDetectLocationBinding.inflate(inflater, container, false)
         viewModel = ViewModelProvider(this)[LocationViewModel::class.java]
-        dataStore = DataStorage.getInstance(requireContext())
+        prayDB = PrayDB.getDBInstance(requireContext())
+        //dataStore = DataStorage.getInstance(requireContext())
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         locationSettingsClient = LocationServices.getSettingsClient(requireActivity())
@@ -218,17 +227,28 @@ class DetectLocationFragment : Fragment() {
             override fun onChanged(value: LocationResponse) {
                 println(value.address.country)
                 lifecycleScope.launch {
-                    dataStore.putString(
+                    /*dataStore.putString(
                         requireContext(),
                         COUNTRY,
                         value.address.country
-                    )
-                    val city = value.address.city ?: value.address.state
-                    dataStore.putString(requireContext(), CITY, city)
-                    dataStore.putString(requireContext(), COUNTRY_CODE, value.address.country_code.trim())
-                    dataStore.putString(requireContext(), LATITUDE, latitude.toString())
-                    dataStore.putString(requireContext(), LONGITUDE, longitude.toString())
-                    findNavController().navigate(R.id.registerFragment)
+                    )*/
+//                    val city = value.address.city ?: value.address.state
+                    val user = value.address.city?.let {
+                        User(
+                            1,
+                            "",
+                            value.address.country,
+                            it,
+                            value.address.country_code,
+                            latitude.toString(),
+                            longitude.toString()
+                        )
+                    }
+                    if (user != null) {
+                        prayDB.userDao().insert(user)
+                        findNavController().navigate(R.id.registerFragment)
+                    }
+
                 }
                 viewModel.locationResponse.removeObserver(this)
             }

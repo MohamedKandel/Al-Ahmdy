@@ -28,7 +28,10 @@ import com.correct.alahmdy.R
 import com.correct.alahmdy.adapter.PrayAdapter
 import com.correct.alahmdy.data.home.AdOnsModel
 import com.correct.alahmdy.data.home.PrayingTimeModel
+import com.correct.alahmdy.data.pray.Data
 import com.correct.alahmdy.data.pray.PrayTimeResponse
+import com.correct.alahmdy.data.pray.TimingPray
+import com.correct.alahmdy.data.user.PrayTime
 import com.correct.alahmdy.databinding.FragmentHomeBinding
 import com.correct.alahmdy.helper.ClickListener
 import com.correct.alahmdy.helper.Constants.ADAPTER
@@ -44,6 +47,7 @@ import com.correct.alahmdy.helper.getTime
 import com.correct.alahmdy.helper.onBackPressed
 import com.correct.alahmdy.helper.onDataFetched
 import com.correct.alahmdy.helper.reformat24HourTime
+import com.correct.alahmdy.room.PrayDB
 import com.mkandeel.datastore.DataStorage
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -59,9 +63,11 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
     private lateinit var adOnsList: MutableList<AdOnsModel>
     private lateinit var adOnAdapter: AdOnsAdapter
     private lateinit var changeListener: FragmentChangeListener
-    private lateinit var dataStore: DataStorage
+
+    //    private lateinit var dataStore: DataStorage
     private lateinit var viewModel: HomeViewModel
     private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
+    private lateinit var prayDB: PrayDB
     private val notificationLauncher: ActivityResultLauncher<String> =
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()
@@ -153,15 +159,17 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
         prayAdapter = PrayAdapter(prayList, this)
         adOnsList = mutableListOf()
         adOnAdapter = AdOnsAdapter(adOnsList, this)
-        dataStore = DataStorage.getInstance(requireContext())
+        //dataStore = DataStorage.getInstance(requireContext())
         viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
+        prayDB = PrayDB.getDBInstance(requireContext())
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestNotificationPermission()
         }
 
         lifecycleScope.launch {
-            binding.txtCity.text = dataStore.getString(requireContext(), CITY)
+            binding.txtCity.text =
+                prayDB.userDao().getById(1)?.city//dataStore.getString(requireContext(), CITY)
         }
 
         val tempTime = "18:40".reformat24HourTime()
@@ -169,7 +177,18 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
         Log.e("Reformat 24 hour time", tempTime.getAa())
         Log.e("Reformat 24 hour time", tempTime.getTime())
 
-        fillPrayingTime()
+        lifecycleScope.launch {
+            val pray = prayDB.prayDao().getByUserID(1)
+            if (pray == null) {
+                fillPrayingTime()
+            } else {
+                if (pray.isNotEmpty()) {
+                    getFromDB()
+                } else {
+                    fillPrayingTime()
+                }
+            }
+        }
         fillAdOns()
 
         binding.txtDate.text = gregorianDate()
@@ -199,6 +218,14 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
 
 
         //binding.txtTime.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
+
+        lifecycleScope.launch {
+            val users = prayDB.userDao().getAll()
+            for (user in users) {
+                Log.v("Users in DB", "${user.id}")
+                Log.v("Users in DB", user.username)
+            }
+        }
 
         binding.adOnsRecyclerView.adapter = adOnAdapter
         binding.prayingTimeRecyclerView.adapter = prayAdapter
@@ -296,7 +323,7 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
         for (pray in prayList) {
             val temp = "${pray.prayTime} ${pray.prayTimeAA}"
             if (prayTime.equals(temp, true)) {
-                return pray.prayName
+                return pray.prayNameEn
             }
         }
         return ""
@@ -314,37 +341,212 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
 
     private fun getMin(minutes: Int): Int = minutes % 60
 
+    private fun getFromDB() {
+        lifecycleScope.launch {
+            val list = prayDB.prayDao().getByUserID(1)
+            if (list != null) {
+                for (pray in 0..<list.size - 1) {
+                    prayList.add(
+                        PrayingTimeModel(
+                            list[pray].prayAr,
+                            list[pray].prayEn,
+                            list[pray].pray_time,
+                            list[pray].pray_aa,
+                            list[pray].isMute
+                        )
+                    )
+                }
+                prayAdapter.updateAdapter(prayList)
+
+                binding.qiamPray.apply {
+                    val qiam = list[list.size - 1]
+                    txtPrayName.text = qiam.prayEn
+                    txtPrayTime.text = qiam.pray_time
+                    txtPrayAa.text = qiam.pray_aa
+                    // fetch data from database if user mute Qiam or not
+                    var isMute = qiam.isMute
+
+                    mutePrayIcon.setImageResource(R.drawable.mute_icon)
+
+                    mutePrayIcon.setOnClickListener {
+                        Log.v("Is Mute mohamed", "$isMute")
+                        // check on database value
+                        if (isMute == 0) {
+                            mutePrayIcon.setImageResource(R.drawable.mute_icon)
+                            isMute = 1
+                        } else {
+                            mutePrayIcon.setImageResource(R.drawable.sound_icon)
+                            isMute = 0
+                        }
+                    }
+                }
+            }
+
+            calculateDifference()
+        }
+    }
+
     // fetch data from API here
     private fun fillPrayingTime() {
         val d = Date()
         val date = SimpleDateFormat("dd-MM-yyyy").format(d)
         Log.v("Reformat 24 hour time", date)
         lifecycleScope.launch {
-            val lat = dataStore.getString(requireContext(), LATITUDE) ?: ""
-            val long = dataStore.getString(requireContext(), LONGITUDE) ?: ""
-            val countryCode = dataStore.getString(requireContext(), COUNTRY_CODE)?: ""
-            val method = if (countryCode.trim().equals("ly") || countryCode.trim().equals("eg")) {
-                5
-            } else {
-                4
-            }
+            val user = prayDB.userDao().getById(1)
+            val lat = user?.lattitude
+                ?: "" //dataStore.getString(requireContext(), LATITUDE) ?: ""
+            val long = user?.longitude
+                ?: "" //dataStore.getString(requireContext(), LONGITUDE) ?: ""
+            val countryCode = user?.country_code
+                ?: "" //dataStore.getString(requireContext(), COUNTRY_CODE) ?: ""
+            val method =
+                if (countryCode.trim().equals("ly") || countryCode.trim().equals("eg")) {
+                    5
+                } else {
+                    4
+                }
             viewModel.getPrayTime(date, lat, long, method, this@HomeFragment)
             val observer = object : Observer<PrayTimeResponse> {
                 override fun onChanged(value: PrayTimeResponse) {
-                    val hijri = "${value.data.date.hijri.day} ${value.data.date.hijri.month.en} ${value.data.date.hijri.year}"
+                    val hijri =
+                        "${value.data.date.hijri.day} ${value.data.date.hijri.month.en} ${value.data.date.hijri.year}"
                     binding.txtHijriDate.text = hijri
-                    prayList.add(PrayingTimeModel("Fajr",value.data.timings.Fajr.reformat24HourTime().getTime(), value.data.timings.Fajr.reformat24HourTime().getAa(),0))
-                    prayList.add(PrayingTimeModel("Shuruq",value.data.timings.Sunrise.reformat24HourTime().getTime(), value.data.timings.Sunrise.reformat24HourTime().getAa(),-1))
-                    prayList.add(PrayingTimeModel("Dhuhr",value.data.timings.Dhuhr.reformat24HourTime().getTime(), value.data.timings.Dhuhr.reformat24HourTime().getAa(),0))
-                    prayList.add(PrayingTimeModel("Asr",value.data.timings.Asr.reformat24HourTime().getTime(), value.data.timings.Asr.reformat24HourTime().getAa(),0))
-                    prayList.add(PrayingTimeModel("Maghrib",value.data.timings.Maghrib.reformat24HourTime().getTime(), value.data.timings.Maghrib.reformat24HourTime().getAa(),0))
-                    prayList.add(PrayingTimeModel("Isha",value.data.timings.Isha.reformat24HourTime().getTime(), value.data.timings.Isha.reformat24HourTime().getAa(),0))
 
+                    prayList.add(
+                        PrayingTimeModel(
+                            "الفجر",
+                            "Fajr",
+                            value.data.timings.Fajr.reformat24HourTime().getTime(),
+                            value.data.timings.Fajr.reformat24HourTime().getAa(),
+                            0
+                        )
+                    )
+                    prayList.add(
+                        PrayingTimeModel(
+                            "الشروق",
+                            "Shuruq",
+                            value.data.timings.Sunrise.reformat24HourTime().getTime(),
+                            value.data.timings.Sunrise.reformat24HourTime().getAa(),
+                            -1
+                        )
+                    )
+                    prayList.add(
+                        PrayingTimeModel(
+                            "الظهر",
+                            "Dhuhr",
+                            value.data.timings.Dhuhr.reformat24HourTime().getTime(),
+                            value.data.timings.Dhuhr.reformat24HourTime().getAa(),
+                            0
+                        )
+                    )
+                    prayList.add(
+                        PrayingTimeModel(
+                            "العصر",
+                            "Asr",
+                            value.data.timings.Asr.reformat24HourTime().getTime(),
+                            value.data.timings.Asr.reformat24HourTime().getAa(),
+                            0
+                        )
+                    )
+                    prayList.add(
+                        PrayingTimeModel(
+                            "المغرب",
+                            "Maghrib",
+                            value.data.timings.Maghrib.reformat24HourTime().getTime(),
+                            value.data.timings.Maghrib.reformat24HourTime().getAa(),
+                            0
+                        )
+                    )
+                    prayList.add(
+                        PrayingTimeModel(
+                            "العشاء",
+                            "Isha",
+                            value.data.timings.Isha.reformat24HourTime().getTime(),
+                            value.data.timings.Isha.reformat24HourTime().getAa(),
+                            0
+                        )
+                    )
+
+                    val timeStamp = value.data.date.timestamp.toLong()
+                    lifecycleScope.launch {
+                        prayDB.prayDao().insert(
+                            PrayTime(
+                                1,
+                                1,
+                                timeStamp,
+                                "Fajr",
+                                "الفجر",
+                                value.data.timings.Fajr.reformat24HourTime().getTime(),
+                                value.data.timings.Fajr.reformat24HourTime().getAa(),
+                                0
+                            )
+                        )
+                        prayDB.prayDao().insert(
+                            PrayTime(
+                                2,
+                                1,
+                                timeStamp,
+                                "Shuruq",
+                                "الشروق",
+                                value.data.timings.Sunrise.reformat24HourTime().getTime(),
+                                value.data.timings.Sunrise.reformat24HourTime().getAa(),
+                                -1
+                            )
+                        )
+                        prayDB.prayDao().insert(
+                            PrayTime(
+                                3,
+                                1,
+                                timeStamp,
+                                "Dhuhr",
+                                "الظهر",
+                                value.data.timings.Dhuhr.reformat24HourTime().getTime(),
+                                value.data.timings.Dhuhr.reformat24HourTime().getAa(),
+                                0
+                            )
+                        )
+                        prayDB.prayDao().insert(
+                            PrayTime(
+                                4,
+                                1,
+                                timeStamp,
+                                "Asr",
+                                "العصر",
+                                value.data.timings.Asr.reformat24HourTime().getTime(),
+                                value.data.timings.Asr.reformat24HourTime().getAa(),
+                                0
+                            )
+                        )
+                        prayDB.prayDao().insert(
+                            PrayTime(
+                                5,
+                                1,
+                                timeStamp,
+                                "Maghrib",
+                                "المغرب",
+                                value.data.timings.Maghrib.reformat24HourTime().getTime(),
+                                value.data.timings.Maghrib.reformat24HourTime().getAa(),
+                                0
+                            )
+                        )
+                        prayDB.prayDao().insert(
+                            PrayTime(
+                                6,
+                                1,
+                                timeStamp,
+                                "Isha",
+                                "العشا",
+                                value.data.timings.Isha.reformat24HourTime().getTime(),
+                                value.data.timings.Isha.reformat24HourTime().getAa(),
+                                0
+                            )
+                        )
+                    }
                     prayAdapter.updateAdapter(prayList)
 
                     binding.qiamPray.apply {
                         txtPrayName.text = "Qiam"
-                        txtPrayTime.text = "2:30"
+                        txtPrayTime.text = "3:30"
                         txtPrayAa.text = "AM"
                         // fetch data from database if user mute Qiam or not
                         var isMute = 1
@@ -362,13 +564,25 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
                                 isMute = 0
                             }
                         }
+                        lifecycleScope.launch {
+                            val qiam = PrayTime(
+                                7,
+                                1,
+                                timeStamp,
+                                "Qiam",
+                                "القيام",
+                                "3:30",
+                                "AM",
+                                isMute
+                            )
+                            prayDB.prayDao().insert(qiam)
+                        }
                     }
                     viewModel.prayTimeResponse.removeObserver(this)
                 }
             }
-            viewModel.prayTimeResponse.observe(viewLifecycleOwner,observer)
+            viewModel.prayTimeResponse.observe(viewLifecycleOwner, observer)
         }
-
 
     }
 
@@ -388,7 +602,9 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
                 1 -> {
                     // pray
                     val isMute = extras.getBoolean(MUTE)
+
                     Log.d("Is mute mohamed", "$isMute")
+                    Log.e("Is mute mohamed", "$position")
                 }
 
                 2 -> {
@@ -407,16 +623,81 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
 
     }
 
-    @SuppressLint("SetTextI18n")
     override fun onResultFetchedSuccessfull(result: PrayTimeResponse) {
-        val mlist = mutableListOf(
-        PrayingTimeModel("Fajr",result.data.timings.Fajr.reformat24HourTime().getTime(), result.data.timings.Fajr.reformat24HourTime().getAa(),0),
-        PrayingTimeModel("Shuruq",result.data.timings.Sunrise.reformat24HourTime().getTime(), result.data.timings.Sunrise.reformat24HourTime().getAa(),-1),
-        PrayingTimeModel("Dhuhr",result.data.timings.Dhuhr.reformat24HourTime().getTime(), result.data.timings.Dhuhr.reformat24HourTime().getAa(),0),
-        PrayingTimeModel("Asr",result.data.timings.Asr.reformat24HourTime().getTime(), result.data.timings.Asr.reformat24HourTime().getAa(),0),
-        PrayingTimeModel("Maghrib",result.data.timings.Maghrib.reformat24HourTime().getTime(), result.data.timings.Maghrib.reformat24HourTime().getAa(),0),
-        PrayingTimeModel("Isha",result.data.timings.Isha.reformat24HourTime().getTime(), result.data.timings.Isha.reformat24HourTime().getAa(),0)
-        )
+        calculateDifference(result)
+    }
+
+    private fun calculateDifference(result: PrayTimeResponse? = null) {
+        var mlist = mutableListOf<PrayingTimeModel>()
+        if (result != null) {
+            mlist = mutableListOf(
+                PrayingTimeModel(
+                    "الفجر",
+                    "Fajr",
+                    result.data.timings.Fajr.reformat24HourTime().getTime(),
+                    result.data.timings.Fajr.reformat24HourTime().getAa(),
+                    0
+                ),
+                PrayingTimeModel(
+                    "الشروق",
+                    "Shuruq",
+                    result.data.timings.Sunrise.reformat24HourTime().getTime(),
+                    result.data.timings.Sunrise.reformat24HourTime().getAa(),
+                    -1
+                ),
+                PrayingTimeModel(
+                    "الظهر",
+                    "Dhuhr",
+                    result.data.timings.Dhuhr.reformat24HourTime().getTime(),
+                    result.data.timings.Dhuhr.reformat24HourTime().getAa(),
+                    0
+                ),
+                PrayingTimeModel(
+                    "العصر",
+                    "Asr",
+                    result.data.timings.Asr.reformat24HourTime().getTime(),
+                    result.data.timings.Asr.reformat24HourTime().getAa(),
+                    0
+                ),
+                PrayingTimeModel(
+                    "المغرب",
+                    "Maghrib",
+                    result.data.timings.Maghrib.reformat24HourTime().getTime(),
+                    result.data.timings.Maghrib.reformat24HourTime().getAa(),
+                    0
+                ),
+                PrayingTimeModel(
+                    "العشاء",
+                    "Isha",
+                    result.data.timings.Isha.reformat24HourTime().getTime(),
+                    result.data.timings.Isha.reformat24HourTime().getAa(),
+                    0
+                )
+            )
+            textViewListener(mlist)
+
+        } else {
+            lifecycleScope.launch {
+                val prayTempList = prayDB.prayDao().getAll()
+                for (i in 0..<prayTempList.size - 1) {
+                    mlist.add(
+                        PrayingTimeModel(
+                            prayTempList[i].prayAr,
+                            prayTempList[i].prayEn,
+                            prayTempList[i].pray_time,
+                            prayTempList[i].pray_aa,
+                            prayTempList[i].isMute
+                        )
+                    )
+                }
+                textViewListener(mlist)
+            }
+        }
+
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun textViewListener(mlist: MutableList<PrayingTimeModel>) {
         val list = temp(mlist)
 
         globalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {

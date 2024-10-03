@@ -28,7 +28,7 @@ class PrayAdapter(
 
     override fun onBindViewHolder(holder: PrayAdapter.ViewHolder, position: Int) {
         val model = list[position]
-        holder.txt_pray_name.text = model.prayName
+        holder.txt_pray_name.text = model.prayNameEn
         holder.txt_pray_time.text = model.prayTime
         holder.txt_pray_time_aa.text = model.prayTimeAA
         if (model.isMute == 0) {
@@ -63,11 +63,11 @@ class PrayAdapter(
                 val bundle = Bundle()
                 bundle.putInt(ADAPTER,1)
                 if (list[adapterPosition].isMute == 0) {
-                    isMute_btn.setImageResource(R.drawable.sound_icon)
+                    isMute_btn.setImageResource(R.drawable.mute_icon)
                     list[adapterPosition].isMute = 1
                     bundle.putBoolean(MUTE,true)
                 } else {
-                    isMute_btn.setImageResource(R.drawable.mute_icon)
+                    isMute_btn.setImageResource(R.drawable.sound_icon)
                     list[adapterPosition].isMute = 0
                     bundle.putBoolean(MUTE,false)
                 }

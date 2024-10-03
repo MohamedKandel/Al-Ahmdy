@@ -8,16 +8,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.correct.alahmdy.R
 import com.correct.alahmdy.databinding.FragmentRegisterBinding
 import com.correct.alahmdy.helper.Constants.CAST_ERROR
 import com.correct.alahmdy.helper.FragmentChangeListener
+import com.correct.alahmdy.room.PrayDB
+import kotlinx.coroutines.launch
 
 class RegisterFragment : Fragment() {
 
     private lateinit var binding: FragmentRegisterBinding
     private lateinit var listener: FragmentChangeListener
+    private lateinit var prayDB: PrayDB
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -42,7 +46,8 @@ class RegisterFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        binding = FragmentRegisterBinding.inflate(inflater,container,false)
+        binding = FragmentRegisterBinding.inflate(inflater, container, false)
+        prayDB = PrayDB.getDBInstance(requireContext())
 
         binding.txtUsername.imeOptions = EditorInfo.IME_ACTION_DONE
 
@@ -61,10 +66,13 @@ class RegisterFragment : Fragment() {
     }
 
     private fun registerUser() {
-        val name = binding.txtUsername.text
+        val name = binding.txtUsername.text.toString()
         if (name.isNotEmpty()) {
             Log.v("Done button", "Hello $name")
-            findNavController().navigate(R.id.homeFragment)
+            lifecycleScope.launch {
+                prayDB.userDao().updateUsername(1, name)
+                findNavController().navigate(R.id.homeFragment)
+            }
         }
     }
 }
