@@ -9,8 +9,8 @@ import androidx.room.PrimaryKey
 class QuranClass(
     @PrimaryKey
     val number: Int,
-    val english: String,
-    val arabic: String
+    val englishName: String,
+    val name: String
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
@@ -26,23 +26,23 @@ class QuranClass(
         other as QuranClass
 
         if (number != other.number) return false
-        if (english != other.english) return false
-        if (arabic != other.arabic) return false
+        if (englishName != other.englishName) return false
+        if (name != other.name) return false
 
         return true
     }
 
     override fun hashCode(): Int {
         var result = number.hashCode()
-        result = 31 * result + english.hashCode()
-        result = 31 * result + arabic.hashCode()
+        result = 31 * result + englishName.hashCode()
+        result = 31 * result + name.hashCode()
         return result
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeInt(number)
-        parcel.writeString(english)
-        parcel.writeString(arabic)
+        parcel.writeString(englishName)
+        parcel.writeString(name)
     }
 
     override fun describeContents(): Int {

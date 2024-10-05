@@ -18,8 +18,14 @@ interface ReadDao {
     @Query("SELECT * FROM read")
     suspend fun getAll(): List<Read>
 
+    @Query("select * from read order by id desc limit 5")
+    suspend fun getLastRead(): List<Read>
+
     @Query("SELECT * FROM read WHERE id = :id")
     suspend fun getById(id: Int): Read
+
+    @Query("select MAX(id) from read")
+    suspend fun getNextID(): Int?
 
     @Delete
     suspend fun delete(entity: Read)

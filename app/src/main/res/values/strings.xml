@@ -32,4 +32,15 @@
     <string name="planner">Planner</string>
     <string name="play">Play audio</string>
     <string name="bookmark">Bookmark</string>
+    <string name="txt_planner">Add Planner</string>
+    <string name="range">Select Range</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="number_days">Number of days</string>
+    <string name="notification">Notification</string>
+    <string name="notification_time">Notification Time</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
+    <string name="Audio">Audio</string>
+    <string name="qari">Qari</string>
 </resources>

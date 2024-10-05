@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.correct.alahmdy.R
+import com.correct.alahmdy.data.quran.QuranClass
 import com.correct.alahmdy.data.quran.QuranModel
 import com.correct.alahmdy.helper.ClickListener
 import com.correct.alahmdy.helper.Constants.ADAPTER
@@ -14,7 +15,7 @@ import com.correct.alahmdy.helper.hide
 import com.correct.alahmdy.helper.show
 
 class QuranAdapter(
-    private var list: List<QuranModel>,
+    private var list: List<QuranClass>,
     private val listener: ClickListener
 ) : RecyclerView.Adapter<QuranAdapter.ViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QuranAdapter.ViewHolder {
@@ -40,7 +41,7 @@ class QuranAdapter(
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun updateAdapter(list: List<QuranModel>) {
+    fun updateAdapter(list: List<QuranClass>) {
         this.list = list
         this.notifyDataSetChanged()
     }

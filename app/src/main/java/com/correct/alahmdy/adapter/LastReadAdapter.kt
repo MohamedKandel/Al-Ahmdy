@@ -7,12 +7,13 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.correct.alahmdy.R
 import com.correct.alahmdy.data.quran.QuranModel
+import com.correct.alahmdy.data.quran.Read
 import com.correct.alahmdy.helper.ClickListener
 import com.correct.alahmdy.helper.Constants.ADAPTER
 import com.correct.alahmdy.helper.Constants.ITEM
 
 class LastReadAdapter(
-    private var list: List<QuranModel>,
+    private var list: List<Read>,
     private val listener: ClickListener
 ) : RecyclerView.Adapter<LastReadAdapter.ViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LastReadAdapter.ViewHolder {
@@ -22,7 +23,7 @@ class LastReadAdapter(
     }
 
     override fun onBindViewHolder(holder: LastReadAdapter.ViewHolder, position: Int) {
-        holder.txt_name.text = list[position].englishName
+        holder.txt_name.text = list[position].english
     }
 
     override fun getItemCount(): Int {
@@ -30,7 +31,7 @@ class LastReadAdapter(
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun updateAdapter(list: List<QuranModel>) {
+    fun updateAdapter(list: List<Read>) {
         this.list = list
         this.notifyDataSetChanged()
     }

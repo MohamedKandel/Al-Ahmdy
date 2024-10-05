@@ -13,10 +13,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.correct.alahmdy.R
 import com.correct.alahmdy.data.quran.FilterModel
+import com.correct.alahmdy.data.quran.QuranClass
 import com.correct.alahmdy.data.quran.QuranModel
+import com.correct.alahmdy.data.quran.Read
 import com.correct.alahmdy.data.quran.SurahNamesResponse
 import com.correct.alahmdy.databinding.FragmentQuraanBinding
 import com.correct.alahmdy.helper.ClickListener
@@ -26,6 +29,8 @@ import com.correct.alahmdy.helper.Constants.CLICKED
 import com.correct.alahmdy.helper.Constants.ITEM
 import com.correct.alahmdy.helper.FragmentChangeListener
 import com.correct.alahmdy.helper.onBackPressed
+import com.correct.alahmdy.room.PrayDB
+import kotlinx.coroutines.launch
 import kotlin.random.Random
 import kotlin.random.nextInt
 
@@ -33,13 +38,14 @@ class QuranFragment : Fragment(), ClickListener {
 
     private lateinit var binding: FragmentQuraanBinding
     private lateinit var fragmentChangeListener: FragmentChangeListener
-    private lateinit var lastReadList: MutableList<QuranModel>
+    private lateinit var lastReadList: MutableList<Read>
     private lateinit var lastReadAdapter: LastReadAdapter
     private lateinit var filterList: MutableList<FilterModel>
     private lateinit var filterAdapter: FilterAdapter
-    private lateinit var quranList: MutableList<QuranModel>
+    private lateinit var quranList: MutableList<QuranClass>
     private lateinit var quranAdapter: QuranAdapter
     private lateinit var viewModel: QuranViewModel
+    private lateinit var prayDB: PrayDB
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -66,6 +72,7 @@ class QuranFragment : Fragment(), ClickListener {
         // Inflate the layout for this fragment
         binding = FragmentQuraanBinding.inflate(inflater, container, false)
         viewModel = ViewModelProvider(this)[QuranViewModel::class.java]
+        prayDB = PrayDB.getDBInstance(requireContext())
 
         lastReadList = mutableListOf()
         lastReadAdapter = LastReadAdapter(lastReadList, this)
@@ -80,7 +87,16 @@ class QuranFragment : Fragment(), ClickListener {
         binding.filteringRecyclerView.adapter = filterAdapter
         binding.quranRecyclerView.adapter = quranAdapter
 
-        fillQuran()
+        lifecycleScope.launch {
+            if (prayDB.quranDao().getAll().isEmpty()) {
+                fillQuran()
+            } else {
+                val list = prayDB.quranDao().getAll()
+                quranList.addAll(list)
+                quranAdapter.updateAdapter(quranList)
+                fillLastRead()
+            }
+        }
         fillFilter()
 
         binding.layoutHeader.apply {
@@ -99,12 +115,22 @@ class QuranFragment : Fragment(), ClickListener {
 
     private fun fillLastRead() {
         // get data from database
-        for (i in 0..4) {
-            val random = Random.nextInt(0..114)
+        /*val randomSet = mutableSetOf<Int>()
+        while (randomSet.size < 6) {
+            val random = Random.nextInt(0..113)
+            randomSet.add(random)
             val model = quranList[random]
             lastReadList.add(model)
         }
-        lastReadAdapter.updateAdapter(lastReadList)
+        println(randomSet)
+        lastReadAdapter.updateAdapter(lastReadList)*/
+        lifecycleScope.launch {
+            val list = prayDB.readDao().getLastRead()
+            if (list.isNotEmpty()) {
+                lastReadList.addAll(list)
+                lastReadAdapter.updateAdapter(lastReadList)
+            }
+        }
     }
 
     private fun fillFilter() {
@@ -124,6 +150,12 @@ class QuranFragment : Fragment(), ClickListener {
                 quranAdapter.updateAdapter(quranList)
                 fillLastRead()
                 viewModel.surahsNamesResponse.removeObserver(this)
+                lifecycleScope.launch {
+                    for (quran in value.data) {
+                        val quranClass = QuranClass(quran.number, quran.englishName, quran.name)
+                        prayDB.quranDao().insert(quranClass)
+                    }
+                }
             }
         }
         viewModel.surahsNamesResponse.observe(viewLifecycleOwner, observer)
@@ -134,6 +166,17 @@ class QuranFragment : Fragment(), ClickListener {
         when (adapterID) {
             1 -> {
                 // last read adapter clicked
+                val model = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    extras.getParcelable(ITEM, Read::class.java)
+                } else {
+                    extras.getParcelable(ITEM)
+                }
+                if (model != null) {
+                    Log.i(
+                        "Read object",
+                        "${model.id}\t${model.number}\t${model.english}\t${model.arabic}"
+                    )
+                }
             }
 
             2 -> {
@@ -144,11 +187,31 @@ class QuranFragment : Fragment(), ClickListener {
             3 -> {
                 // quran adapter clicked
                 val model = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    extras.getParcelable(ITEM,QuranModel::class.java)
+                    extras.getParcelable(ITEM, QuranClass::class.java)
                 } else {
                     extras.getParcelable(ITEM)
                 }
-                Log.i("Adapter ID mohamed", "${model?.number}\t${model?.name}\t${model?.englishName}")
+
+                lifecycleScope.launch {
+                    if (model != null) {
+                        var id = prayDB.readDao().getNextID() ?: 0
+                        id += 1
+                        Log.v("Read ID", "$id")
+                        val readObject = Read(
+                            id = id,
+                            number = model.number, english = model.englishName,
+                            arabic = model.name
+                        )
+                        prayDB.readDao().insert(readObject)
+                        lastReadList.add(0,readObject)
+                        lastReadAdapter.updateAdapter(lastReadList)
+                    }
+                }
+
+                Log.i(
+                    "Adapter ID mohamed",
+                    "${model?.number}\t${model?.name}\t${model?.englishName}"
+                )
             }
         }
     }

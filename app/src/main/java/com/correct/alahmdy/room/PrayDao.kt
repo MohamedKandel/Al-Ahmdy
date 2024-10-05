@@ -24,6 +24,9 @@ interface PrayDao {
     @Query("select * from pray where user_id = :userID")
     suspend fun getByUserID(userID: Int): List<PrayTime>?
 
+    @Query("delete from pray where 1")
+    suspend fun deleteAll()
+
     @Delete
     suspend fun delete(entity: PrayTime)
 

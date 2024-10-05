@@ -16,7 +16,7 @@ import androidx.room.PrimaryKey
 ])
 class Read (
     @PrimaryKey(autoGenerate = true)
-    val id: Int,
+    val id: Int? = null,
     val number: Int,
     val english: String,
     val arabic: String,
@@ -52,7 +52,9 @@ class Read (
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeInt(id)
+        if (id != null) {
+            parcel.writeInt(id)
+        }
         parcel.writeInt(number)
         parcel.writeString(english)
         parcel.writeString(arabic)

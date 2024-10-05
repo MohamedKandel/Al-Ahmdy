@@ -38,6 +38,8 @@ import com.correct.alahmdy.helper.Constants.ADAPTER
 import com.correct.alahmdy.helper.Constants.CAST_ERROR
 import com.correct.alahmdy.helper.Constants.CITY
 import com.correct.alahmdy.helper.Constants.COUNTRY_CODE
+import com.correct.alahmdy.helper.Constants.GREGORIAN_DATE
+import com.correct.alahmdy.helper.Constants.HIJRI_DATE
 import com.correct.alahmdy.helper.Constants.LATITUDE
 import com.correct.alahmdy.helper.Constants.LONGITUDE
 import com.correct.alahmdy.helper.Constants.MUTE
@@ -64,7 +66,7 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
     private lateinit var adOnAdapter: AdOnsAdapter
     private lateinit var changeListener: FragmentChangeListener
 
-    //    private lateinit var dataStore: DataStorage
+    private lateinit var dataStore: DataStorage
     private lateinit var viewModel: HomeViewModel
     private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
     private lateinit var prayDB: PrayDB
@@ -159,7 +161,7 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
         prayAdapter = PrayAdapter(prayList, this)
         adOnsList = mutableListOf()
         adOnAdapter = AdOnsAdapter(adOnsList, this)
-        //dataStore = DataStorage.getInstance(requireContext())
+        dataStore = DataStorage.getInstance(requireContext())
         viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
         prayDB = PrayDB.getDBInstance(requireContext())
 
@@ -183,7 +185,12 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
                 fillPrayingTime()
             } else {
                 if (pray.isNotEmpty()) {
-                    getFromDB()
+                    if (getCurrentDate().equals(dataStore.getString(requireContext(),GREGORIAN_DATE))) {
+                        getFromDB()
+                    } else {
+                        prayDB.prayDao().deleteAll()
+                        fillPrayingTime()
+                    }
                 } else {
                     fillPrayingTime()
                 }
@@ -249,6 +256,10 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
         val dayYear = input.split("-")      //[dd,MM,yyyy]
         return "$goal, ${dayYear[0]} $month ${dayYear[2]}"
     }
+
+    @SuppressLint("SimpleDateFormat")
+    private fun getCurrentDate(): String = SimpleDateFormat("dd-MM-yyyy").format(Date())
+
 
     private fun formatDifference(minutes: Long): String {
         val hours = getHours(minutes.toInt())
@@ -357,6 +368,10 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
                     )
                 }
                 prayAdapter.updateAdapter(prayList)
+                lifecycleScope.launch {
+                    val hijri = dataStore.getString(requireContext(), HIJRI_DATE) ?: ""
+                    binding.txtHijriDate.text = hijri
+                }
 
                 binding.qiamPray.apply {
                     val qiam = list[list.size - 1]
@@ -388,8 +403,7 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
 
     // fetch data from API here
     private fun fillPrayingTime() {
-        val d = Date()
-        val date = SimpleDateFormat("dd-MM-yyyy").format(d)
+        val date = getCurrentDate()
         Log.v("Reformat 24 hour time", date)
         lifecycleScope.launch {
             val user = prayDB.userDao().getById(1)
@@ -411,6 +425,10 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
                     val hijri =
                         "${value.data.date.hijri.day} ${value.data.date.hijri.month.en} ${value.data.date.hijri.year}"
                     binding.txtHijriDate.text = hijri
+                    lifecycleScope.launch {
+                        dataStore.putString(requireContext(), HIJRI_DATE, hijri)
+                        dataStore.putString(requireContext(), GREGORIAN_DATE, date)
+                    }
 
                     prayList.add(
                         PrayingTimeModel(
