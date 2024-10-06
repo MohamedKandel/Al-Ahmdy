@@ -94,4 +94,7 @@ dependencies {
     // qibla
     implementation(libs.android.qibla.finder)
     implementation(libs.compass.qibla)
+
+    // dots indicator
+    implementation(libs.dotsindicator)
 }

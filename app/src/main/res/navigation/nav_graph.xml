@@ -40,4 +40,14 @@
         android:name="com.correct.alahmdy.ui.quraan.SurahFragment"
         android:label="fragment_surah"
         tools:layout="@layout/fragment_surah" />
+    <fragment
+        android:id="@+id/doaaFragment"
+        android:name="com.correct.alahmdy.ui.duaa.DoaaFragment"
+        android:label="fragment_doaa"
+        tools:layout="@layout/fragment_doaa" />
+    <fragment
+        android:id="@+id/reciterFragment"
+        android:name="com.correct.alahmdy.ui.quraan.ReciterFragment"
+        android:label="fragment_reciter"
+        tools:layout="@layout/fragment_reciter" />
 </navigation>
