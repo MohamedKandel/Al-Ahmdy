@@ -80,4 +80,9 @@
         android:name="com.correct.alahmdy.ui.tasbeh.SebhaFragment"
         android:label="fragment_sebha"
         tools:layout="@layout/fragment_sebha" />
+    <fragment
+        android:id="@+id/rankingTasbehFragment"
+        android:name="com.correct.alahmdy.ui.tasbeh.RankingTasbehFragment"
+        android:label="fragment_ranking_tasbeh"
+        tools:layout="@layout/fragment_ranking_tasbeh" />
 </navigation>
