@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
 
 
 @Entity(
-    tableName = "Tasbeh", foreignKeys = [
+    tableName = "tasbeh", foreignKeys = [
         ForeignKey(
             entity = User::class,
             parentColumns = ["id"],
