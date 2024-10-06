@@ -19,4 +19,7 @@ object Constants {
     const val HIJRI_DATE = "hijri"
     const val GREGORIAN_DATE = "gregorian date"
     const val SOURCE = "come from"
+    const val IS_VIBRATE = "is vibrate"
+    const val IS_SOUND = "is sound"
+    const val TOTAL_COUNT = "total count"
 }

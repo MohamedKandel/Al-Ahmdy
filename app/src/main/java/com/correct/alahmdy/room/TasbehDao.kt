@@ -20,4 +20,7 @@ interface TasbehDao {
 
     @Delete
     suspend fun delete(entity: Tasbeh)
+
+    @Query("select max(id) from tasbeh")
+    suspend fun getNextID(): Int?
 }

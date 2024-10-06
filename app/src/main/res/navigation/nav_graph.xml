@@ -75,4 +75,9 @@
         android:name="com.correct.alahmdy.ui.tasbeh.TasbehIndexingFragment"
         android:label="fragment_tasbeh_indexing"
         tools:layout="@layout/fragment_tasbeh_indexing" />
+    <fragment
+        android:id="@+id/sebhaFragment"
+        android:name="com.correct.alahmdy.ui.tasbeh.SebhaFragment"
+        android:label="fragment_sebha"
+        tools:layout="@layout/fragment_sebha" />
 </navigation>

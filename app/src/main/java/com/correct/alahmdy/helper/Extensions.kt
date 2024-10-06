@@ -2,6 +2,7 @@ package com.correct.alahmdy.helper
 
 import android.animation.ValueAnimator
 import android.app.Activity
+import android.app.Dialog
 import android.content.Context
 import android.content.Context.VIBRATOR_SERVICE
 import android.graphics.Color
@@ -14,6 +15,8 @@ import android.os.VibratorManager
 import android.util.Base64
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.WindowManager
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
@@ -113,7 +116,7 @@ fun String.getAa(): String {
             strBuilder.append(c)
         }
     }
-    return strBuilder.toString().replace(":","").trim()
+    return strBuilder.toString().replace(":", "").trim()
 }
 
 // call to get Time and set it to text clock
@@ -159,7 +162,7 @@ fun String.reformat24HourTime(): String {
     val arr = this.split(":")       //[18,40]
     var aa = ""
     Log.v("Reformat 24 hour time", "${arr[0].toInt()}")
-    Log.v("Reformat 24 hour time",arr[1])
+    Log.v("Reformat 24 hour time", arr[1])
     var hour = arr[0].toInt()
     if (arr[0].toInt() > 12) {
         hour = arr[0].toInt() - 12
@@ -185,11 +188,22 @@ fun TextView.setTextGradient(startColor: Int, endColor: Int) {
     this.paint.shader = shader
 }
 
+fun Fragment.displayDialog(layout: Int): Dialog {
+    val dialog = Dialog(this.requireContext())
+    dialog.setContentView(layout)
+    dialog.setCancelable(true)
+    dialog.setCanceledOnTouchOutside(true)
+    dialog.window?.setLayout(MATCH_PARENT, WRAP_CONTENT)
+    dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+    return dialog
+}
+
 // to be tested
 fun Fragment.vibrate(duration: Long) {
     val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         val vibratorManager =
-            this.requireContext().getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            this.requireContext()
+                .getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
 
         vibratorManager.defaultVibrator
 
@@ -198,7 +212,7 @@ fun Fragment.vibrate(duration: Long) {
     }
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        vibrator.vibrate(VibrationEffect.createOneShot(duration,VibrationEffect.DEFAULT_AMPLITUDE))
+        vibrator.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE))
     } else {
         vibrator.vibrate(duration)
     }
