@@ -10,4 +10,5 @@
     <color name="alphaBlack">#60000000</color>
     <color name="light_green">#00CE32</color>
     <color name="shadow_color">#83B6B6B6</color>
+    <color name="hint_text_color">#80006819</color>
 </resources>

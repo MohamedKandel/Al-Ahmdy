@@ -50,4 +50,29 @@
         android:name="com.correct.alahmdy.ui.quraan.ReciterFragment"
         android:label="fragment_reciter"
         tools:layout="@layout/fragment_reciter" />
+    <fragment
+        android:id="@+id/azkarIndexingFragment"
+        android:name="com.correct.alahmdy.ui.azkar.AzkarIndexingFragment"
+        android:label="fragment_azkar_indexing"
+        tools:layout="@layout/fragment_azkar_indexing" />
+    <fragment
+        android:id="@+id/hadithFragment"
+        android:name="com.correct.alahmdy.ui.hadith.HadithFragment"
+        android:label="fragment_hadith"
+        tools:layout="@layout/fragment_hadith" />
+    <fragment
+        android:id="@+id/hadithMainFragment"
+        android:name="com.correct.alahmdy.ui.hadith.HadithMainFragment"
+        android:label="fragment_hadith_main"
+        tools:layout="@layout/fragment_hadith_main" />
+    <fragment
+        android:id="@+id/azkarFragment"
+        android:name="com.correct.alahmdy.ui.azkar.AzkarFragment"
+        android:label="fragment_azkar"
+        tools:layout="@layout/fragment_azkar" />
+    <fragment
+        android:id="@+id/tasbehIndexingFragment"
+        android:name="com.correct.alahmdy.ui.tasbeh.TasbehIndexingFragment"
+        android:label="fragment_tasbeh_indexing"
+        tools:layout="@layout/fragment_tasbeh_indexing" />
 </navigation>

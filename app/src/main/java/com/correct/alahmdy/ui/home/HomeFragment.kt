@@ -24,6 +24,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.correct.alahmdy.R
 import com.correct.alahmdy.adapter.PrayAdapter
 import com.correct.alahmdy.data.home.AdOnsModel
@@ -628,6 +629,20 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
                 2 -> {
                     // ad ons
                     Log.v("Item clicked position", "$position")
+                    when(position) {
+                        0-> {
+                            findNavController().navigate(R.id.tasbehIndexingFragment)
+                        }
+                        1 -> {
+                            findNavController().navigate(R.id.doaaFragment)
+                        }
+                        2 -> {
+                            findNavController().navigate(R.id.azkarIndexingFragment)
+                        }
+                        3 -> {
+                            findNavController().navigate(R.id.hadithMainFragment)
+                        }
+                    }
                 }
 
                 else -> {

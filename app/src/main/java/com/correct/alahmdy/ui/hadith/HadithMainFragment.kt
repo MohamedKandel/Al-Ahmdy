@@ -6,10 +6,12 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
 import com.correct.alahmdy.R
 import com.correct.alahmdy.databinding.FragmentHadithMainBinding
 import com.correct.alahmdy.helper.Constants.CAST_ERROR
 import com.correct.alahmdy.helper.FragmentChangeListener
+import com.correct.alahmdy.helper.onBackPressed
 
 class HadithMainFragment : Fragment() {
 
@@ -35,6 +37,16 @@ class HadithMainFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         binding = FragmentHadithMainBinding.inflate(inflater,container,false)
+
+        binding.headerLayout.txtTitle.text = resources.getString(R.string.hadith)
+        binding.headerLayout.btnBack.setOnClickListener {
+            // back
+            findNavController().navigate(R.id.homeFragment)
+        }
+
+        onBackPressed {
+            findNavController().navigate(R.id.homeFragment)
+        }
 
         return binding.root
     }

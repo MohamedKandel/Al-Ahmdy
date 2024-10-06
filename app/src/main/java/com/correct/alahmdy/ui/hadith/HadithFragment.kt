@@ -1,4 +1,4 @@
-package com.correct.alahmdy.ui.duaa
+package com.correct.alahmdy.ui.hadith
 
 import android.content.Context
 import android.os.Bundle
@@ -8,20 +8,20 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import com.correct.alahmdy.R
-import com.correct.alahmdy.databinding.FragmentDoaaBinding
+import com.correct.alahmdy.databinding.FragmentHadithBinding
 import com.correct.alahmdy.helper.Constants.CAST_ERROR
 import com.correct.alahmdy.helper.FragmentChangeListener
 import com.correct.alahmdy.helper.onBackPressed
 
-class DoaaFragment : Fragment() {
+class HadithFragment : Fragment() {
 
-    private lateinit var binding: FragmentDoaaBinding
-    private lateinit var changeListener: FragmentChangeListener
+    private lateinit var binding: FragmentHadithBinding
+    private lateinit var changeLister: FragmentChangeListener
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is FragmentChangeListener) {
-            changeListener = context
+            changeLister = context
         } else {
             throw ClassCastException(CAST_ERROR)
         }
@@ -36,19 +36,18 @@ class DoaaFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        binding = FragmentDoaaBinding.inflate(inflater,container,false)
+        binding = FragmentHadithBinding.inflate(inflater,container,false)
 
-        binding.headerLayout.txtTitle.text = resources.getString(R.string.duaa)
+        binding.headerLayout.txtTitle.text = resources.getString(R.string.hadith)
         binding.headerLayout.btnBack.setOnClickListener {
-            findNavController().navigate(R.id.homeFragment)
+            // back
+            findNavController().navigate(R.id.hadithMainFragment)
         }
 
         onBackPressed {
-            findNavController().navigate(R.id.homeFragment)
+            findNavController().navigate(R.id.hadithMainFragment)
         }
-
 
         return binding.root
     }
-
 }

@@ -2,7 +2,15 @@ package com.correct.alahmdy.helper
 
 import android.animation.ValueAnimator
 import android.app.Activity
+import android.content.Context
+import android.content.Context.VIBRATOR_SERVICE
 import android.graphics.Color
+import android.graphics.LinearGradient
+import android.graphics.Shader
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.util.Base64
 import android.util.Log
 import android.view.View
@@ -10,6 +18,7 @@ import android.view.WindowManager
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
 import android.widget.TextClock
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -163,4 +172,34 @@ fun String.reformat24HourTime(): String {
     Log.d("Reformat 24 hour time", "$hour")
 
     return "${hour}:${arr[1]} $aa"
+}
+
+fun TextView.setTextGradient(startColor: Int, endColor: Int) {
+    val paint = this.paint
+    val width = paint.measureText(this.text.toString())
+    val shader = LinearGradient(
+        0f, 0f, 0f, this.textSize,
+        intArrayOf(startColor, endColor),
+        floatArrayOf(0f, 1f), Shader.TileMode.CLAMP
+    )
+    this.paint.shader = shader
+}
+
+// to be tested
+fun Fragment.vibrate(duration: Long) {
+    val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val vibratorManager =
+            this.requireContext().getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+
+        vibratorManager.defaultVibrator
+
+    } else {
+        this.requireContext().getSystemService(VIBRATOR_SERVICE) as Vibrator
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        vibrator.vibrate(VibrationEffect.createOneShot(duration,VibrationEffect.DEFAULT_AMPLITUDE))
+    } else {
+        vibrator.vibrate(duration)
+    }
 }

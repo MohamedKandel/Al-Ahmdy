@@ -20,6 +20,7 @@ abstract class PrayDB : RoomDatabase() {
     abstract fun quranDao(): QuranDao
     abstract fun filterDao(): FilterDao
     abstract fun readDao(): ReadDao
+    abstract fun tasbehDao(): TasbehDao
 
     companion object {
         @Volatile
