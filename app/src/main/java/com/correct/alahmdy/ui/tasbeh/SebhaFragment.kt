@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -143,44 +144,56 @@ class SebhaFragment : Fragment() {
 
 
             // set text with zekr
-            firstRandom = generateRandomNumber()
-            binding.txtZekr.text = list[firstRandom].tasbeh
+            if (list.size > 0) {
+                firstRandom = generateRandomNumber()
 
+                binding.txtZekr.text = list[firstRandom].tasbeh
+            }
             binding.count.setOnClickListener {
-                binding.count.isEnabled = false
-                Handler(Looper.getMainLooper()).postDelayed({
-                    lifecycleScope.launch {
-                        val isVibrateOn =
-                            dataStore.getBoolean(requireContext(), IS_VIBRATE) ?: false
-                        val isSoundOn = dataStore.getBoolean(requireContext(), IS_SOUND) ?: false
+                if (list.size > 0) {
+                    binding.count.isEnabled = false
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        lifecycleScope.launch {
+                            val isVibrateOn =
+                                dataStore.getBoolean(requireContext(), IS_VIBRATE) ?: false
+                            val isSoundOn =
+                                dataStore.getBoolean(requireContext(), IS_SOUND) ?: false
 
-                        if (isVibrateOn) {
-                            vibrate(50)
-                        }
-                        if (isSoundOn) {
-                            // play sound
-                            audioUtils.playAudio(requireContext(), R.raw.tasbeh_sound)
+                            if (isVibrateOn) {
+                                vibrate(50)
+                            }
+                            if (isSoundOn) {
+                                // play sound
+                                audioUtils.playAudio(requireContext(), R.raw.tasbeh_sound)
 //                            audioUtils.releaseMedia()
+                            }
+                            count++
+                            totalCount++
+                            binding.txtTotal.text =
+                                "${resources.getString(R.string.total_tasbeh)} $totalCount"
+                            dataStore.putInt(requireContext(), TOTAL_COUNT, totalCount)
+                            binding.txtCount.text = "$count"
                         }
-                        count++
-                        totalCount++
-                        binding.txtTotal.text = "${resources.getString(R.string.total_tasbeh)} $totalCount"
-                        dataStore.putInt(requireContext(), TOTAL_COUNT, totalCount)
-                        binding.txtCount.text = "$count"
-                    }
-                    binding.count.isEnabled = true
-                }, 700)
+                        binding.count.isEnabled = true
+                    }, 700)
+                } else {
+                    Toast.makeText(requireContext(),resources.getString(R.string.zekr_required),Toast.LENGTH_SHORT).show()
+                }
             }
 
             binding.reloadBtn.setOnClickListener {
-                secondRandom = generateRandomNumber()
-                while (secondRandom == firstRandom) {
+                if (list.size > 0) {
                     secondRandom = generateRandomNumber()
+                    while (secondRandom == firstRandom) {
+                        secondRandom = generateRandomNumber()
+                    }
+                    firstRandom = secondRandom
+                    binding.txtZekr.text = list[secondRandom].tasbeh
+                    count = 0
+                    binding.txtCount.text = "$count"
+                } else {
+                    Toast.makeText(requireContext(),resources.getString(R.string.zekr_required),Toast.LENGTH_SHORT).show()
                 }
-                firstRandom = secondRandom
-                binding.txtZekr.text = list[secondRandom].tasbeh
-                count = 0
-                binding.txtCount.text = "$count"
             }
 
             binding.vibrateBtn.setOnClickListener {
@@ -237,5 +250,11 @@ class SebhaFragment : Fragment() {
         return binding.root
     }
 
-    private fun generateRandomNumber() = Random.nextInt(0, list.size)
+    private fun generateRandomNumber() : Int {
+        if (list.size > 0) {
+            return Random.nextInt(0, list.size)
+        } else {
+            return 0
+        }
+    }
 }

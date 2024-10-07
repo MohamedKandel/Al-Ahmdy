@@ -47,4 +47,5 @@
     <string name="write_here">Write here</string>
     <string name="total_tasbeh">Total Tasbeh :</string>
     <string name="list_tasbeh">List of Tasbeh</string>
+    <string name="zekr_required">You should add at least one Zekr</string>
 </resources>

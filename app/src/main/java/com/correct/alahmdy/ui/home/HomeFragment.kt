@@ -9,6 +9,8 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
@@ -52,7 +54,9 @@ import com.correct.alahmdy.helper.onDataFetched
 import com.correct.alahmdy.helper.reformat24HourTime
 import com.correct.alahmdy.room.PrayDB
 import com.mkandeel.datastore.DataStorage
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -66,6 +70,16 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
     private lateinit var adOnsList: MutableList<AdOnsModel>
     private lateinit var adOnAdapter: AdOnsAdapter
     private lateinit var changeListener: FragmentChangeListener
+
+    /*val handler = Handler(Looper.getMainLooper())
+    val runnable = object : Runnable {
+        override fun run() {
+            if (globalLayoutListener != null) {
+                binding.txtTime.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
+            }
+            handler.postDelayed(this, 1000)
+        }
+    }*/
 
     private lateinit var dataStore: DataStorage
     private lateinit var viewModel: HomeViewModel
@@ -139,13 +153,17 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
     override fun onResume() {
         super.onResume()
         changeListener.onFragmentChangeListener(R.id.homeFragment)
+
         if (globalLayoutListener != null) {
             binding.txtTime.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
         }
+    //handler.post(runnable)
     }
 
     override fun onPause() {
         super.onPause()
+        //handler.removeCallbacks(runnable)
+
         if (globalLayoutListener != null) {
             binding.txtTime.viewTreeObserver.removeOnGlobalLayoutListener(globalLayoutListener)
         }
@@ -186,7 +204,13 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
                 fillPrayingTime()
             } else {
                 if (pray.isNotEmpty()) {
-                    if (getCurrentDate().equals(dataStore.getString(requireContext(),GREGORIAN_DATE))) {
+                    if (getCurrentDate().equals(
+                            dataStore.getString(
+                                requireContext(),
+                                GREGORIAN_DATE
+                            )
+                        )
+                    ) {
                         getFromDB()
                     } else {
                         prayDB.prayDao().deleteAll()
@@ -629,16 +653,19 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
                 2 -> {
                     // ad ons
                     Log.v("Item clicked position", "$position")
-                    when(position) {
-                        0-> {
+                    when (position) {
+                        0 -> {
                             findNavController().navigate(R.id.tasbehIndexingFragment)
                         }
+
                         1 -> {
                             findNavController().navigate(R.id.doaaFragment)
                         }
+
                         2 -> {
                             findNavController().navigate(R.id.azkarIndexingFragment)
                         }
+
                         3 -> {
                             findNavController().navigate(R.id.hadithMainFragment)
                         }
@@ -723,10 +750,41 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
                         )
                     )
                 }
-                textViewListener(mlist)
+
+                withContext(Dispatchers.Main) {
+                    calculateTimeDifference(mlist)
+                    textViewListener(mlist)
+                }
             }
         }
 
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun calculateTimeDifference(mlist: MutableList<PrayingTimeModel>) {
+        val list = temp(mlist)
+
+        Log.v("TextViewListener mohamed", "onTextViewListener")
+
+        val txtTime = SimpleDateFormat("h:mm aa").format(Date())
+        val current = parseTime(txtTime)
+//        val current = parseTime("${binding.txtTime.text} ${binding.txtAa.text}")
+        val (nearestNextTime, differenceInMinutes) = getNearestNextTimeAndDifference(
+            current,
+            list
+        )
+
+        // Print the nearest next time (formatted back to "hh:mm a")
+        nearestNextTime?.let {
+            val outputFormat = SimpleDateFormat("h:mm aa", Locale.getDefault())
+            println("Nearest next time: ${outputFormat.format(it.time)}")
+            println("Difference: ${formatDifference(differenceInMinutes)}")
+            println("Next pray : ${getPrayNameByTime(outputFormat.format(it.time))}")
+            binding.txtRemaining.text =
+                "${getPrayNameByTime(outputFormat.format(it.time))} ${
+                    formatDifference(differenceInMinutes)
+                }"
+        } ?: println("No times found.")
     }
 
     @SuppressLint("SetTextI18n")
@@ -735,7 +793,30 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
 
         Log.v("TextViewListener mohamed", "onTextViewListener")
 
+        /*val txtTime = SimpleDateFormat("h:mm aa").format(Date())
+        val current = parseTime(txtTime)
+//        val current = parseTime("${binding.txtTime.text} ${binding.txtAa.text}")
+        val (nearestNextTime, differenceInMinutes) = getNearestNextTimeAndDifference(
+            current,
+            list
+        )
+
+        // Print the nearest next time (formatted back to "hh:mm a")
+        nearestNextTime?.let {
+            val outputFormat = SimpleDateFormat("h:mm aa", Locale.getDefault())
+            println("Nearest next time: ${outputFormat.format(it.time)}")
+            println("Difference: ${formatDifference(differenceInMinutes)}")
+            println("Next pray : ${getPrayNameByTime(outputFormat.format(it.time))}")
+            binding.txtRemaining.text =
+                "${getPrayNameByTime(outputFormat.format(it.time))} ${
+                    formatDifference(differenceInMinutes)
+                }"
+        } ?: println("No times found.")*/
+
         globalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
+
+            Log.v("TextViewListener mohamed", "onTextViewListener")
+
             println("${binding.txtTime.text} ${binding.txtAa.text}")
             val current = parseTime("${binding.txtTime.text} ${binding.txtAa.text}")
             val (nearestNextTime, differenceInMinutes) = getNearestNextTimeAndDifference(
@@ -757,5 +838,6 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
         }
 
         binding.txtTime.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
+        //handler.post(runnable)
     }
 }
