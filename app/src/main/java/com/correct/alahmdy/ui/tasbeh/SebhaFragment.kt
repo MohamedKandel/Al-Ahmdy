@@ -55,6 +55,11 @@ class SebhaFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        changeListener.onFragmentChangeListener(R.id.sebhaFragment)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -73,6 +78,10 @@ class SebhaFragment : Fragment() {
         list = mutableListOf()
 
         binding.txtCount.text = "$count"
+
+        binding.txtTotal.setOnClickListener{
+            findNavController().navigate(R.id.rankingTasbehFragment)
+        }
 
         binding.headerLayout.apply {
             txtTitle.text = resources.getString(R.string.tasbeh)

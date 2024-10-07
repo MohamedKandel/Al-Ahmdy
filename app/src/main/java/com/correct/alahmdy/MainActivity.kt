@@ -31,7 +31,12 @@ class MainActivity : AppCompatActivity(), FragmentChangeListener {
             R.id.splashFragment,
             R.id.detectLocationFragment,
             R.id.registerFragment,
-            R.id.surahFragment
+            R.id.surahFragment,
+            R.id.tasbehIndexingFragment,
+            R.id.sebhaFragment,
+            R.id.rankingTasbehFragment,
+            R.id.hadithMainFragment,
+            R.id.azkarIndexingFragment
         )
 
         binding.homeBtn.setOnClickListener {

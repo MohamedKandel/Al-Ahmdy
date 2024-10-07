@@ -32,6 +32,11 @@ class TasbehIndexingFragment : Fragment(), ClickListener {
     private lateinit var list: MutableList<Tasbeh>
     private lateinit var adapter: TasbehAdapter
 
+    override fun onResume() {
+        super.onResume()
+        changeListener.onFragmentChangeListener(R.id.tasbehIndexingFragment)
+    }
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is FragmentChangeListener) {
@@ -102,6 +107,7 @@ class TasbehIndexingFragment : Fragment(), ClickListener {
             buttonCancel.setOnClickListener {
                 dialog.dismiss()
                 dialog.cancel()
+                findNavController().navigate(R.id.sebhaFragment)
             }
 
             dialog.show()

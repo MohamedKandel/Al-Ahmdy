@@ -27,6 +27,11 @@ class HadithMainFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        changeListener.onFragmentChangeListener(R.id.hadithMainFragment)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }

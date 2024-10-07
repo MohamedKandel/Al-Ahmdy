@@ -26,6 +26,11 @@ class ReciterFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        changeListener.onFragmentChangeListener(R.id.reciterFragment)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }

@@ -733,6 +733,8 @@ class HomeFragment : Fragment(), ClickListener, onDataFetched<PrayTimeResponse> 
     private fun textViewListener(mlist: MutableList<PrayingTimeModel>) {
         val list = temp(mlist)
 
+        Log.v("TextViewListener mohamed", "onTextViewListener")
+
         globalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
             println("${binding.txtTime.text} ${binding.txtAa.text}")
             val current = parseTime("${binding.txtTime.text} ${binding.txtAa.text}")
